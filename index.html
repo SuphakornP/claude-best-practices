@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>คู่มือ Best Practices — Claude Code & Claude Cowork (2026)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,9 +21,9 @@
   --font-mono:"IBM Plex Mono","SF Mono",Consolas,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;scroll-padding-top:84px}
+html{scroll-behavior:smooth;scroll-padding-top:84px;overflow-x:hidden}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
-body{font-family:var(--font-body);background:var(--paper);color:var(--ink);line-height:1.75;font-size:16px}
+body{font-family:var(--font-body);background:var(--paper);color:var(--ink);line-height:1.75;font-size:16px;overflow-x:hidden}
 a{color:var(--code-deep)}
 :focus-visible{outline:3px solid var(--both);outline-offset:2px;border-radius:4px}
 
@@ -107,23 +107,23 @@ section[data-track="cowork"] ul.tick li::before{color:var(--cw)}
 .callout b.tt{font-family:var(--font-disp)}
 
 /* ===== Tables ===== */
-.tbl-wrap{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:var(--r);background:#fff;box-shadow:var(--shadow)}
-table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
-th{font-family:var(--font-disp);font-weight:600;text-align:left;background:var(--paper);padding:11px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl-wrap{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:var(--r);background:#fff;box-shadow:var(--shadow);max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-family:var(--font-disp);font-weight:600;text-align:left;background:var(--paper);padding:11px 16px;border-bottom:1px solid var(--line)}
 td{padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
 tr:last-child td{border-bottom:0}
 td.ok{color:var(--code-deep)} td.no{color:var(--warn)}
-code{font-family:var(--font-mono);font-size:.88em;background:var(--code-soft);color:var(--code-deep);padding:2px 6px;border-radius:6px;white-space:nowrap}
+code{font-family:var(--font-mono);font-size:.88em;background:var(--code-soft);color:var(--code-deep);padding:2px 6px;border-radius:6px;word-break:break-word}
 section[data-track="cowork"] code{background:var(--cw-soft);color:var(--cw-deep)}
 
 /* ===== Terminal blocks ===== */
-.term{background:var(--term-bg);border-radius:var(--r);margin:14px 0;overflow:hidden;box-shadow:var(--shadow)}
+.term{background:var(--term-bg);border-radius:var(--r);margin:14px 0;overflow:hidden;box-shadow:var(--shadow);max-width:100%}
 .term-head{display:flex;align-items:center;gap:8px;padding:9px 14px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08)}
 .term-head .td{width:10px;height:10px;border-radius:50%;background:#3E5C4B}
 .term-head .ttl{font-family:var(--font-mono);font-size:11.5px;color:var(--term-dim);margin-left:4px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .copy-btn{border:1px solid rgba(255,255,255,.18);background:transparent;color:#C9D8CE;font-family:var(--font-body);font-size:11.5px;padding:3px 11px;border-radius:999px;cursor:pointer;flex:none}
 .copy-btn:hover{background:rgba(255,255,255,.1)}
-.term pre{padding:15px 18px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:#DCEAE1}
+.term pre{padding:15px 18px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:#DCEAE1;max-width:100%;word-break:break-word}
 .term pre .c{color:var(--term-dim)} .term pre .g{color:var(--term-green)} .term pre .a{color:var(--term-amber)}
 
 /* ===== Before/After cards ===== */
