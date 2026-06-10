@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คู่มือ Best Practices — Claude Code & Claude Cowork (2026)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EFF1EC; --card:#FFFFFF; --ink:#171D19; --muted:#5A655D; --line:#D9DED7;
+  --code:#0E6B43; --code-soft:#E2F0E7; --code-deep:#0A5434;
+  --cw:#B4690E; --cw-soft:#F7ECDB; --cw-deep:#8F5208;
+  --both:#44508F; --both-soft:#E7EAF6;
+  --term-bg:#0C1F16; --term-green:#7BE3A6; --term-dim:#52735F; --term-amber:#E8C27A;
+  --warn:#B3401F; --warn-soft:#F8E6DE;
+  --r:12px; --shadow:0 1px 2px rgba(23,29,25,.06),0 4px 14px rgba(23,29,25,.05);
+  --font-body:"IBM Plex Sans Thai",-apple-system,"Segoe UI",sans-serif;
+  --font-disp:"Bai Jamjuree","IBM Plex Sans Thai",sans-serif;
+  --font-mono:"IBM Plex Mono","SF Mono",Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+body{font-family:var(--font-body);background:var(--paper);color:var(--ink);line-height:1.75;font-size:16px}
+a{color:var(--code-deep)}
+:focus-visible{outline:3px solid var(--both);outline-offset:2px;border-radius:4px}
+
+/* ===== Layout: sidebar + main ===== */
+.app{display:grid;grid-template-columns:272px minmax(0,1fr);min-height:100vh}
+.rail{position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:20px 14px 32px;scrollbar-width:thin}
+.rail-brand{font-family:var(--font-disp);font-weight:700;font-size:15px;line-height:1.35;padding:4px 8px 14px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.rail-brand .sub{display:block;font-family:var(--font-body);font-weight:400;font-size:12px;color:var(--muted);margin-top:2px}
+.rail-group{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:16px 8px 6px;display:flex;align-items:center;gap:7px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.dot.c{background:var(--code)} .dot.w{background:var(--cw)} .dot.b{background:var(--both)} .dot.i{background:var(--muted)}
+.rail a.nav{display:block;padding:6px 10px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:13.5px;line-height:1.5}
+.rail a.nav:hover{background:var(--paper)}
+.rail a.nav.active{background:var(--ink);color:#fff}
+.main{padding:0 clamp(18px,4vw,56px) 80px;max-width:980px}
+
+/* ===== Top filter bar ===== */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(239,241,236,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 calc(-1*clamp(18px,4vw,56px));padding:12px clamp(18px,4vw,56px);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.topbar .lbl{font-size:13px;color:var(--muted);font-weight:500}
+.seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;font-family:var(--font-body);font-size:13px;font-weight:500;padding:6px 14px;border-radius:999px;cursor:pointer;color:var(--muted);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.seg button[data-f="code"][aria-pressed="true"]{background:var(--code)}
+.seg button[data-f="cowork"][aria-pressed="true"]{background:var(--cw)}
+.seg button[data-f="shared"][aria-pressed="true"]{background:var(--both)}
+
+/* filter behaviour */
+body[data-filter="code"] section[data-track="cowork"],
+body[data-filter="code"] section[data-track="shared"],
+body[data-filter="cowork"] section[data-track="code"],
+body[data-filter="cowork"] section[data-track="shared"],
+body[data-filter="shared"] section[data-track="code"],
+body[data-filter="shared"] section[data-track="cowork"]{display:none}
+body[data-filter="code"] .rail a[data-track="cowork"],body[data-filter="code"] .rail a[data-track="shared"],body[data-filter="code"] .rail-group.g-cowork,body[data-filter="code"] .rail-group.g-shared,
+body[data-filter="cowork"] .rail a[data-track="code"],body[data-filter="cowork"] .rail a[data-track="shared"],body[data-filter="cowork"] .rail-group.g-code,body[data-filter="cowork"] .rail-group.g-shared,
+body[data-filter="shared"] .rail a[data-track="code"],body[data-filter="shared"] .rail a[data-track="cowork"],body[data-filter="shared"] .rail-group.g-code,body[data-filter="shared"] .rail-group.g-cowork{display:none}
+
+/* ===== Hero ===== */
+.hero{padding:46px 0 18px}
+.hero h1{font-family:var(--font-disp);font-weight:700;font-size:clamp(28px,4.4vw,44px);line-height:1.22;letter-spacing:-.01em}
+.hero h1 .hl-c{color:var(--code)} .hero h1 .hl-w{color:var(--cw)}
+.hero p.lead{font-size:17px;color:var(--muted);margin-top:14px;max-width:62ch}
+.hero-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.chip{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500}
+.chip b{font-family:var(--font-mono);font-weight:500}
+
+/* ===== Sections ===== */
+section{padding:34px 0 8px;border-bottom:1px dashed var(--line)}
+section:last-of-type{border-bottom:0}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;padding:4px 11px;border-radius:999px;margin-bottom:10px}
+.eyebrow.t-code{background:var(--code-soft);color:var(--code-deep)}
+.eyebrow.t-cowork{background:var(--cw-soft);color:var(--cw-deep)}
+.eyebrow.t-shared{background:var(--both-soft);color:var(--both)}
+.eyebrow.t-intro{background:#fff;border:1px solid var(--line);color:var(--muted)}
+h2{font-family:var(--font-disp);font-weight:700;font-size:clamp(22px,3vw,29px);line-height:1.3;margin-bottom:8px}
+h3{font-family:var(--font-disp);font-weight:600;font-size:18px;margin:26px 0 8px}
+section > p, .card > p{max-width:70ch}
+p+p{margin-top:10px}
+.muted{color:var(--muted)} .small{font-size:13.5px}
+ul.tick,ol.steps{margin:10px 0 6px 0;padding-left:0;list-style:none}
+ul.tick li{padding:4px 0 4px 26px;position:relative;max-width:70ch}
+ul.tick li::before{content:"▸";position:absolute;left:8px;color:var(--code);font-weight:700}
+section[data-track="cowork"] ul.tick li::before{color:var(--cw)}
+
+/* ===== Cards & grids ===== */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;box-shadow:var(--shadow);margin:14px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tool-card{border-top:4px solid var(--line)}
+.tool-card.tc-chat{border-top-color:var(--muted)}
+.tool-card.tc-code{border-top-color:var(--code)}
+.tool-card.tc-cw{border-top-color:var(--cw)}
+.tool-card .ico{font-size:26px}
+.tool-card h3{margin:6px 0 4px;font-size:17px}
+.tool-card p{font-size:14px;color:var(--muted)}
+.tool-card .out{margin-top:10px;font-size:12.5px;font-family:var(--font-mono);background:var(--paper);border-radius:8px;padding:6px 10px;display:inline-block}
+.callout{border-left:4px solid var(--both);background:var(--both-soft);border-radius:0 var(--r) var(--r) 0;padding:14px 18px;margin:16px 0}
+.callout.c-code{border-left-color:var(--code);background:var(--code-soft)}
+.callout.c-cw{border-left-color:var(--cw);background:var(--cw-soft)}
+.callout.c-warn{border-left-color:var(--warn);background:var(--warn-soft)}
+.callout b.tt{font-family:var(--font-disp)}
+
+/* ===== Tables ===== */
+.tbl-wrap{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:var(--r);background:#fff;box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th{font-family:var(--font-disp);font-weight:600;text-align:left;background:var(--paper);padding:11px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.ok{color:var(--code-deep)} td.no{color:var(--warn)}
+code{font-family:var(--font-mono);font-size:.88em;background:var(--code-soft);color:var(--code-deep);padding:2px 6px;border-radius:6px;white-space:nowrap}
+section[data-track="cowork"] code{background:var(--cw-soft);color:var(--cw-deep)}
+
+/* ===== Terminal blocks ===== */
+.term{background:var(--term-bg);border-radius:var(--r);margin:14px 0;overflow:hidden;box-shadow:var(--shadow)}
+.term-head{display:flex;align-items:center;gap:8px;padding:9px 14px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08)}
+.term-head .td{width:10px;height:10px;border-radius:50%;background:#3E5C4B}
+.term-head .ttl{font-family:var(--font-mono);font-size:11.5px;color:var(--term-dim);margin-left:4px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.copy-btn{border:1px solid rgba(255,255,255,.18);background:transparent;color:#C9D8CE;font-family:var(--font-body);font-size:11.5px;padding:3px 11px;border-radius:999px;cursor:pointer;flex:none}
+.copy-btn:hover{background:rgba(255,255,255,.1)}
+.term pre{padding:15px 18px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:#DCEAE1}
+.term pre .c{color:var(--term-dim)} .term pre .g{color:var(--term-green)} .term pre .a{color:var(--term-amber)}
+
+/* ===== Before/After cards ===== */
+.ba{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff;box-shadow:var(--shadow);margin:12px 0}
+.ba-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 16px;background:var(--paper);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.ba-head .t{font-weight:600;font-size:14px}
+.ba-toggle{display:flex;border:1px solid var(--line);border-radius:999px;background:#fff;padding:2px}
+.ba-toggle button{border:0;background:transparent;font-family:var(--font-body);font-size:12px;font-weight:600;padding:4px 13px;border-radius:999px;cursor:pointer;color:var(--muted)}
+.ba-toggle button.on-bad{background:var(--warn);color:#fff}
+.ba-toggle button.on-good{background:var(--code);color:#fff}
+.ba-body{padding:14px 16px;font-family:var(--font-mono);font-size:13px;line-height:1.7;white-space:pre-wrap}
+.ba-body.bad{background:var(--warn-soft)} .ba-body.good{background:var(--code-soft)}
+.ba-why{padding:9px 16px;font-size:13px;color:var(--muted);border-top:1px dashed var(--line)}
+
+/* ===== Pipeline / flow diagrams ===== */
+.pipe{display:flex;align-items:stretch;gap:0;margin:18px 0;flex-wrap:wrap}
+.pipe .step{flex:1;min-width:150px;background:#fff;border:1px solid var(--line);padding:14px 14px 12px;position:relative}
+.pipe .step:first-child{border-radius:var(--r) 0 0 var(--r)}
+.pipe .step:last-child{border-radius:0 var(--r) var(--r) 0}
+.pipe .step+.step{border-left:0}
+.pipe .n{font-family:var(--font-mono);font-size:11px;color:#fff;background:var(--code);width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:6px}
+.pipe.p-cw .n{background:var(--cw)}
+.pipe .step h4{font-family:var(--font-disp);font-size:14.5px;font-weight:600}
+.pipe .step p{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:3px}
+.pipe-loop{font-size:12.5px;color:var(--muted);font-family:var(--font-mono);margin-top:-6px;margin-bottom:14px;padding-left:6px}
+
+/* ===== Bar charts ===== */
+.chart{margin:16px 0}
+.chart .row{display:grid;grid-template-columns:150px 1fr 56px;align-items:center;gap:12px;margin:9px 0}
+.chart .name{font-size:13.5px;font-weight:500;text-align:right}
+.chart .track{background:#fff;border:1px solid var(--line);border-radius:999px;height:22px;overflow:hidden}
+.chart .fill{display:block;width:0;height:100%;border-radius:999px;background:var(--muted);transition:width .9s cubic-bezier(.2,.7,.3,1)}
+.chart .fill.f-code{background:var(--code)} .chart .fill.f-cw{background:var(--cw)} .chart .fill.f-grey{background:#9AA59D}
+.chart .val{font-family:var(--font-mono);font-size:13px;font-weight:500}
+.chart-src{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* ===== Quiz terminal (signature) ===== */
+#quiz .term pre{min-height:200px}
+.q-opts{display:flex;gap:10px;padding:0 18px 16px;flex-wrap:wrap}
+.q-opts button{font-family:var(--font-mono);font-size:13px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#DCEAE1;border-radius:8px;padding:8px 18px;cursor:pointer}
+.q-opts button:hover{background:var(--term-green);color:var(--term-bg);border-color:var(--term-green)}
+.q-result{display:none;margin:0 18px 18px;border-radius:10px;padding:14px 16px;font-size:14px;background:rgba(123,227,166,.12);border:1px solid rgba(123,227,166,.35);color:#EAF6EE}
+.q-result a{color:var(--term-green)}
+
+/* ===== Tabs ===== */
+.tabs{margin:14px 0}
+.tab-btns{display:flex;gap:6px;flex-wrap:wrap;border-bottom:2px solid var(--line);padding-bottom:0}
+.tab-btns button{border:1px solid var(--line);border-bottom:0;background:var(--paper);font-family:var(--font-body);font-size:13.5px;font-weight:500;padding:8px 16px;border-radius:10px 10px 0 0;cursor:pointer;color:var(--muted);position:relative;top:2px}
+.tab-btns button[aria-selected="true"]{background:#fff;color:var(--ink);border-color:var(--line);font-weight:600;border-bottom:2px solid #fff}
+.tab-pane{display:none;background:#fff;border:1px solid var(--line);border-top:0;border-radius:0 0 var(--r) var(--r);padding:18px 20px}
+.tab-pane.show{display:block}
+
+/* ===== Accordion ===== */
+details.acc{background:#fff;border:1px solid var(--line);border-radius:var(--r);margin:10px 0;box-shadow:var(--shadow);overflow:hidden}
+details.acc summary{cursor:pointer;padding:14px 18px;font-weight:600;font-size:14.5px;list-style:none;display:flex;gap:10px;align-items:baseline}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary::before{content:"+";font-family:var(--font-mono);color:var(--muted);flex:none}
+details.acc[open] summary::before{content:"–"}
+details.acc .acc-body{padding:0 18px 16px;font-size:14px}
+details.acc .fix{margin-top:8px;font-size:13.5px;background:var(--code-soft);border-radius:8px;padding:8px 12px}
+details.acc .fix b{color:var(--code-deep)}
+
+/* ===== Checklists ===== */
+.cl{list-style:none;margin:10px 0}
+.cl li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.cl li:last-child{border-bottom:0}
+.cl input{width:18px;height:18px;margin-top:4px;accent-color:var(--code);flex:none;cursor:pointer}
+.cl.cw-cl input{accent-color:var(--cw)}
+.progress{height:8px;background:var(--paper);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-top:12px}
+.progress i{display:block;height:100%;width:0;background:var(--code);transition:width .3s}
+.progress.pw i{background:var(--cw)}
+.ing{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:14px 0}
+.ing .it{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;line-height:1.55}
+.ing .it b{display:block;font-family:var(--font-disp);font-size:13.5px;margin-bottom:2px}
+.ing .it .em{font-size:20px;display:block;margin-bottom:4px}
+
+/* ===== Footer ===== */
+footer{margin-top:40px;padding-top:24px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+footer h3{font-size:15px;margin-top:0}
+.totop{position:fixed;right:18px;bottom:18px;background:var(--ink);color:#fff;border:0;border-radius:999px;width:42px;height:42px;font-size:18px;cursor:pointer;box-shadow:var(--shadow);display:none}
+
+/* ===== Responsive ===== */
+@media (max-width:960px){
+  .app{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:14px}
+  .rail-nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}
+  .rail-group{display:none!important}
+  .rail a.nav{white-space:nowrap;background:var(--paper);font-size:12.5px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .pipe .step{min-width:100%;border-left:1px solid var(--line)!important;border-top:0}
+  .pipe .step:first-child{border-radius:var(--r) var(--r) 0 0}
+  .pipe .step:last-child{border-radius:0 0 var(--r) var(--r)}
+  .pipe .step+.step{border-top:0}
+  .chart .row{grid-template-columns:104px 1fr 48px}
+}
+@media print{.rail,.topbar,.totop,.copy-btn,.q-opts{display:none!important}section{break-inside:avoid-page}}
+</style>
+</head>
+<body data-filter="all">
+<div class="app">
+<!-- ===== SIDEBAR ===== -->
+<nav class="rail" aria-label="สารบัญ">
+  <div class="rail-brand">📘 Claude Code × Cowork<span class="sub">Best Practices · ฉบับเทรนนิ่ง 2026</span></div>
+  <div class="rail-nav">
+    <div class="rail-group g-intro"><span class="dot i"></span>เริ่มต้นที่นี่</div>
+    <a class="nav" data-track="intro" href="#overview">🧭 ภาพรวม 3 เครื่องมือ</a>
+    <a class="nav" data-track="intro" href="#decide">🤔 เลือกเครื่องมือไหนดี</a>
+    <a class="nav" data-track="intro" href="#stats">📊 ตัวเลขน่ารู้</a>
+    <div class="rail-group g-code"><span class="dot c"></span>Claude Code — Dev</div>
+    <a class="nav" data-track="code" href="#setup">🚀 ติดตั้ง &amp; เริ่มต้น</a>
+    <a class="nav" data-track="code" href="#models">🎛️ Model &amp; Effort</a>
+    <a class="nav" data-track="code" href="#claudemd">📝 CLAUDE.md</a>
+    <a class="nav" data-track="code" href="#workflow">🔄 Workflow หลัก</a>
+    <a class="nav" data-track="code" href="#context">🧹 Context Management</a>
+    <a class="nav" data-track="code" href="#perms">🔐 Permissions &amp; Safety</a>
+    <a class="nav" data-track="code" href="#mcp">🔌 MCP Servers</a>
+    <a class="nav" data-track="code" href="#power">⚡ Skills · Hooks · Subagents</a>
+    <a class="nav" data-track="code" href="#scale">🤹 Headless &amp; Multi-Claude</a>
+    <a class="nav" data-track="code" href="#prompts-code">💬 Prompt: Before → After</a>
+    <a class="nav" data-track="code" href="#pitfalls">⚠️ Pitfalls ที่พบบ่อย</a>
+    <div class="rail-group g-cowork"><span class="dot w"></span>Claude Cowork — ทีม</div>
+    <a class="nav" data-track="cowork" href="#cw-intro">🖥️ รู้จัก Cowork</a>
+    <a class="nav" data-track="cowork" href="#cw-fit">🎯 งานที่เหมาะกับ Cowork</a>
+    <a class="nav" data-track="cowork" href="#cw-prompt">✍️ สั่งงานให้เวิร์ก</a>
+    <a class="nav" data-track="cowork" href="#cw-models">🎚️ Model &amp; Effort ใน Cowork</a>
+    <a class="nav" data-track="cowork" href="#cw-skills">🛠️ Skills &amp; เอกสาร</a>
+    <a class="nav" data-track="cowork" href="#cw-connect">🔗 Connectors &amp; Plugins</a>
+    <a class="nav" data-track="cowork" href="#cw-cases">📋 Use Cases จริง</a>
+    <a class="nav" data-track="cowork" href="#cw-auto">⏰ Schedule · Projects · Dispatch</a>
+    <a class="nav" data-track="cowork" href="#cw-safety">🔒 Safety &amp; Prompt Injection</a>
+    <div class="rail-group g-shared"><span class="dot b"></span>ใช้ร่วมกัน</div>
+    <a class="nav" data-track="shared" href="#compare">🆚 ตารางเปรียบเทียบ</a>
+    <a class="nav" data-track="shared" href="#principles">🎓 หลัก Prompting ร่วม</a>
+    <a class="nav" data-track="shared" href="#checklist">✅ Quick Start Checklist</a>
+  </div>
+</nav>
+
+<main class="main">
+<!-- ===== FILTER BAR ===== -->
+<div class="topbar">
+  <span class="lbl">โหมดการอ่าน:</span>
+  <div class="seg" role="group" aria-label="กรองเนื้อหาตามกลุ่มผู้ใช้">
+    <button data-f="all" aria-pressed="true">ทั้งหมด</button>
+    <button data-f="code" aria-pressed="false">🧑‍💻 Claude Code</button>
+    <button data-f="cowork" aria-pressed="false">🧑‍💼 Claude Cowork</button>
+    <button data-f="shared" aria-pressed="false">🤝 ใช้ร่วมกัน</button>
+  </div>
+</div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <h1>คู่มือ Best Practices<br><span class="hl-c">Claude Code</span> × <span class="hl-w">Claude Cowork</span></h1>
+  <p class="lead">เอกสารทบทวนและสอนต่อ สำหรับ <b>developer</b> ที่ใช้ Claude Code และ <b>knowledge worker</b> ที่ใช้ Claude Cowork — ทั้งคู่ใช้ engine เดียวกัน (Claude Agent SDK + MCP) แต่ออกแบบมาให้ "มือ" คนละแบบ ใช้ปุ่มด้านบนเพื่อกรองเนื้อหาเฉพาะกลุ่มที่ต้องการสอนได้เลย</p>
+  <div class="hero-chips">
+    <span class="chip">🗓️ อัปเดต <b>มิ.ย. 2026</b></span>
+    <span class="chip">🧩 Engine เดียวกัน: <b>Agent SDK + MCP</b></span>
+    <span class="chip">📈 Claude Code = most-loved AI coding tool <b>46%</b>*</span>
+  </div>
+</header>
+
+<!-- ===== S1 OVERVIEW ===== -->
+<section id="overview" data-track="intro">
+  <span class="eyebrow t-intro">🧭 ภาพรวม</span>
+  <h2>🧭 หนึ่งครอบครัว สามเครื่องมือ — ต่างกันที่ "output"</h2>
+  <p>วิธีจำง่ายที่สุด: ดูว่าอยากได้อะไรออกมาจากงานนั้น <b>ความคิด</b> ใช้ Chat, <b>ไฟล์/deliverable</b> ใช้ Cowork, <b>โค้ดใน codebase</b> ใช้ Claude Code</p>
+  <div class="grid3">
+    <div class="card tool-card tc-chat">
+      <span class="ico">💬</span>
+      <h3>Claude (Chat)</h3>
+      <p>เอางานไปหา Claude — ถาม-ตอบ, brainstorm, ร่างข้อความ, อธิบายแนวคิด</p>
+      <span class="out">output → ความคิด / คำตอบ</span>
+    </div>
+    <div class="card tool-card tc-code">
+      <span class="ico">🧑‍💻</span>
+      <h3>Claude Code</h3>
+      <p>agentic coding tool ใน terminal / IDE / desktop — อ่านไฟล์ รันคำสั่ง แก้โค้ด commit ได้เอง</p>
+      <span class="out">output → โค้ด / PR ใน repo</span>
+    </div>
+    <div class="card tool-card tc-cw">
+      <span class="ico">🧑‍💼</span>
+      <h3>Claude Cowork</h3>
+      <p>agentic knowledge-work app บน desktop — ชี้ folder / เชื่อม app แล้วให้ทำงานหลายขั้นตอนแทน</p>
+      <span class="out">output → docx · pptx · xlsx · pdf</span>
+    </div>
+  </div>
+  <div class="callout"><b class="tt">🔑 หัวใจของเรื่อง:</b> Cowork ถูกสร้างด้วย Claude Code เอง และสืบทอดวงจร <b>plan → act → verify</b> มาเต็มๆ — สิ่งที่เรียนรู้จากฝั่งหนึ่ง (เช่น การให้ context ที่ดี, การ verify ผลงาน) ใช้ได้กับอีกฝั่งเสมอ ทีมที่เก่งจะใช้ทั้งสามตัว: <b>คิดใน Chat → ทำงาน operation ใน Cowork → build ใน Code</b> แล้วส่ง output ต่อกัน เช่น PM สรุป customer interviews ใน Cowork → ส่งให้ dev ป้อนเข้า Claude Code เพื่อ implement</div>
+</section>
+
+<!-- ===== S2 DECISION QUIZ (signature) ===== -->
+<section id="decide" data-track="intro">
+  <span class="eyebrow t-intro">🤔 Decision Helper</span>
+  <h2>🤔 เลือกเครื่องมือ + model ไหนดี? ตอบ 2–3 คำถามใน terminal นี้</h2>
+  <p>คลิกปุ่มเพื่อตอบ — ระบบจะแนะนำ<b>เครื่องมือ</b>ที่เหมาะกับงาน และถ้าคำตอบคือ Cowork จะถามต่ออีกข้อเพื่อแนะนำ <b>model + effort</b> ที่ควรใช้ด้วย (อิงเกณฑ์จากเอกสาร Anthropic)</p>
+  <div class="term" id="quiz">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">claude — tool-picker session</span></div>
+    <pre id="q-log"><span class="g">$</span> ./pick-tool.sh
+<span class="c"># เครื่องมือที่ใช่ ขึ้นกับว่างานอยู่ที่ไหน และอยากได้อะไรออกมา</span>
+</pre>
+    <div class="q-opts" id="q-opts"></div>
+    <div class="q-result" id="q-result" role="status"></div>
+  </div>
+  <p class="small muted">📌 สรุปเกณฑ์ (เผื่อพิมพ์เป็นเอกสาร): งานอยู่ใน codebase/git/terminal → <b>Claude Code</b> · ต้องได้ไฟล์ / มี input หลายอย่าง / เป็นงานทำซ้ำ → <b>Cowork</b> · แค่ถาม-ตอบ/brainstorm → <b>Chat</b> · model ใน Cowork: งานเบา → <b>Sonnet</b> · มาตรฐาน → <b>default</b> · หนัก/ยาว → <b>Opus/Fable + effort สูง</b></p>
+</section>
+
+<!-- ===== S3 STATS ===== -->
+<section id="stats" data-track="intro">
+  <span class="eyebrow t-intro">📊 Adoption</span>
+  <h2>📊 ตัวเลขน่ารู้ก่อนสอน — ทำไมต้องเรียนตอนนี้</h2>
+  <div class="card">
+    <h3 style="margin-top:0">"Most loved" AI coding tool ในหมู่ developer</h3>
+    <div class="chart" aria-label="ผลสำรวจเครื่องมือ AI coding ที่ developer ชอบที่สุด">
+      <div class="row"><span class="name">Claude Code</span><span class="track"><span class="fill f-code" data-w="46"></span></span><span class="val">46%</span></div>
+      <div class="row"><span class="name">Cursor</span><span class="track"><span class="fill f-grey" data-w="19"></span></span><span class="val">19%</span></div>
+      <div class="row"><span class="name">GitHub Copilot</span><span class="track"><span class="fill f-grey" data-w="9"></span></span><span class="val">9%</span></div>
+    </div>
+    <p class="chart-src">ที่มา: Pragmatic Engineer Survey ก.พ. 2026 (ผู้ตอบ ~15,000 devs)</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">ส่วนแบ่งตลาด enterprise AI coding</h3>
+    <div class="chart" aria-label="ส่วนแบ่งตลาด enterprise AI coding">
+      <div class="row"><span class="name">Anthropic</span><span class="track"><span class="fill f-code" data-w="54"></span></span><span class="val">~54%</span></div>
+      <div class="row"><span class="name">OpenAI</span><span class="track"><span class="fill f-grey" data-w="21"></span></span><span class="val">~21%</span></div>
+    </div>
+    <p class="chart-src">ที่มา: Menlo Ventures ธ.ค. 2025 (เพิ่มจาก ~42% ในหกเดือนก่อนหน้า)</p>
+  </div>
+  <p class="small muted">* ตัวเลขทั้งหมดมาจาก third-party surveys/analytics ไม่ใช่ตัวเลขทางการจาก Anthropic — ใช้เพื่อเห็นภาพแนวโน้มเท่านั้น</p>
+</section>
+
+<!-- ============ CODE TRACK ============ -->
+<!-- ===== S4 SETUP ===== -->
+<section id="setup" data-track="code">
+  <span class="eyebrow t-code">🧑‍💻 Claude Code · 01</span>
+  <h2>🚀 ติดตั้ง &amp; เริ่มต้นใช้งาน</h2>
+  <p><b>ความต้องการ:</b> macOS 13+ / Linux (Ubuntu 20.04+) / Windows 10+, RAM 4GB+, Node.js 18+ (เฉพาะถ้าติดตั้งผ่าน npm) และต้องมี paid plan (Pro / Max / Team / Enterprise) — free plan ใช้ไม่ได้</p>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">install.sh — ติดตั้ง Claude Code</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre><span class="c"># วิธีที่ 1: Native installer (แนะนำ — ไม่ต้องมี Node.js, auto-update)</span>
+curl -fsSL https://claude.ai/install.sh | bash        <span class="c"># macOS / Linux</span>
+irm https://claude.ai/install.ps1 | iex               <span class="c"># Windows PowerShell</span>
+
+<span class="c"># วิธีที่ 2: npm (เมื่อต้องการ pin version)</span>
+npm install -g @anthropic-ai/claude-code
+<span class="c"># ⚠️ ห้ามใช้ sudo npm install -g เด็ดขาด (จะเกิดปัญหา permission)</span>
+
+<span class="c"># ตรวจสอบ + เริ่ม session แรก</span>
+claude --version
+claude doctor          <span class="c"># วินิจฉัยปัญหา environment</span>
+cd your-project &amp;&amp; claude   <span class="c"># ครั้งแรกจะเปิด browser ให้ login</span></pre>
+  </div>
+  <div class="callout c-code"><b class="tt">💡 Tip:</b> เปิด <code>claude</code> จาก root ของ project เสมอ เพื่อให้ Claude เห็น CLAUDE.md และโครงสร้าง repo ครบ — ใช้ได้ทั้งใน terminal, VS Code / JetBrains extension, Claude Desktop (Code tab พร้อม visual diff) และสั่งจากมือถือผ่าน remote control</div>
+</section>
+
+<!-- ===== S4b MODELS & EFFORT ===== -->
+<section id="models" data-track="code">
+  <span class="eyebrow t-code">🧑‍💻 Claude Code · 02</span>
+  <h2>🎛️ เลือก Model &amp; Effort — จับคู่ "เกียร์" ให้ถูกงาน</h2>
+  <p>มี 2 คันโยกที่ควบคุมคุณภาพ-ความเร็ว-การกิน usage limit: <b>Model</b> (ใช้สมองรุ่นไหน) × <b>Effort</b> (ให้คิดลึกแค่ไหนต่อรอบ) — เอกสาร Anthropic ชี้ว่า <i>"การปรับ effort มักเป็นคันโยกที่ดีกว่าการสลับ model"</i> เพราะได้ trade-off ละเอียดกว่าในรุ่นเดียวกัน</p>
+
+  <h3>🧠 คันโยกที่ 1: เลือก Model family</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Model</th><th>จุดแข็ง</th><th>ใช้กับงาน</th></tr>
+    <tr><td><b>Haiku 4.5</b> 🐇</td><td>เร็วสุด กิน limit น้อยสุด</td><td>rename / format / lookup ง่ายๆ / fan-out script จำนวนมาก</td></tr>
+    <tr><td><b>Sonnet 4.6</b> ⚖️</td><td>สมดุลที่สุด — daily driver</td><td>feature ปกติ, bugfix ทั่วไป (default ของ Pro / Team Standard)</td></tr>
+    <tr><td><b>Opus 4.x</b> 🧠</td><td>reasoning ลึก</td><td>architecture, debugging ข้ามหลายไฟล์, refactor ใหญ่, code review เชิงลึก (default ของ Max / Team Premium)</td></tr>
+    <tr><td><b>Fable 5</b> ✨</td><td>tier เหนือ Opus — investigate ก่อนลงมือ + verify งานตัวเองบ่อยกว่า</td><td>งานยาวเกินหนึ่งนั่ง / root-cause คลุมเครือ — <b>ไม่เป็น default</b> ต้องเลือกเองด้วย <code>/model fable</code> แล้ว "บอก outcome ไม่ใช่ steps"</td></tr>
+  </table></div>
+  <ul class="tick">
+    <li>สลับ model กลาง session ได้โดย <b>context ไม่หาย</b> — เปิดงานด้วย Sonnet แล้วค่อยยกระดับเป็น Opus เฉพาะตอนติดหิน</li>
+    <li><code>opusplan</code> = โหมด hybrid: <b>plan ด้วย Opus, execute ด้วย Sonnet</b> — ได้แผนระดับ Opus ในราคาการลงมือระดับ Sonnet</li>
+    <li>session ยาว / โค้ดเบสใหญ่: <code>sonnet[1m]</code> / <code>opus[1m]</code> = context 1 ล้าน token · alias <code>best</code> = Fable 5 ถ้า org มีสิทธิ์ ไม่งั้น Opus ล่าสุด</li>
+    <li>บนแผน subscription เมื่อใช้ Opus ใกล้โควตา ระบบอาจ<b>สลับลง Sonnet ให้อัตโนมัติ</b> — เช็ค model ปัจจุบันด้วย <code>/status</code> (ระดับ effort โชว์ข้าง spinner ตลอดเวลา)</li>
+    <li><b>Fable 5</b> มี safety classifier ในตัว: งานสาย cybersecurity / biology จะถูก re-route ไปรันบน Opus อัตโนมัติ — เป็นพฤติกรรมปกติของระบบ ไม่ใช่บัญชีโดน flag</li>
+  </ul>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">model — วิธีตั้งค่าทั้งหมด</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre><span class="c"># ใน session: สลับได้ทันที ไม่ล้าง context</span>
+/model               <span class="c"># เปิด picker (มี effort slider ← → ในตัว)</span>
+/model opus          <span class="c"># หรือ sonnet / haiku / opusplan / fable</span>
+/effort              <span class="c"># เปิด slider · /effort xhigh ตั้งตรงๆ · /effort auto = กลับ default</span>
+/status              <span class="c"># ดู model + effort ปัจจุบัน</span>
+<span class="c"># ใน picker: Enter = สลับ + ตั้งเป็น default · กด s = เฉพาะ session นี้</span>
+
+<span class="c"># ตอน launch: เฉพาะ session นั้น</span>
+claude --model claude-fable-5 --effort high
+
+<span class="c"># ตั้งถาวร: env var หรือ settings.json</span>
+export ANTHROPIC_MODEL="claude-opus-4-8"
+<span class="c"># env CLAUDE_CODE_EFFORT_LEVEL ชนะทุกช่องทาง · settings รับเฉพาะ low–xhigh:</span>
+<span class="c"># .claude/settings.json → { "model": "opus", "effortLevel": "high" }</span></pre>
+  </div>
+
+  <h3>⚡ คันโยกที่ 2: Effort ladder (ตั้งผ่าน <code>/effort</code>)</h3>
+  <div class="pipe">
+    <div class="step"><span class="n">1</span><h4>🌱 low</h4><p>ตอบไวจาก pattern แทบไม่คิด — งาน routine, ยืด limit ได้ไกลสุด</p></div>
+    <div class="step"><span class="n">2</span><h4>🚶 medium</h4><p>คิดพอประมาณ — งาน coding ประจำวันส่วนใหญ่</p></div>
+    <div class="step"><span class="n">3</span><h4>🏃 high ★</h4><p>สมดุลคุณภาพ/ความเร็วดีสุด — <b>default</b> ของ Fable 5, Opus 4.8/4.6, Sonnet 4.6</p></div>
+    <div class="step"><span class="n">4</span><h4>🔥 xhigh</h4><p>จุดที่ docs บอกว่า "ดีสุดสำหรับงาน coding/agentic ส่วนใหญ่" บน Opus 4.7/4.8 (default ของ 4.7)</p></div>
+    <div class="step"><span class="n">5</span><h4>🌋 max</h4><p>คิดลึกสุด ไม่จำกัด token — เฉพาะ session นั้น ใช้กับปัญหาหินสุดเท่านั้น</p></div>
+  </div>
+  <p class="pipe-loop">↑ low–xhigh จำค่าข้าม session · max ใช้ครั้งเดียวจบ · ถ้าตั้งระดับที่รุ่นไม่รองรับ ระบบ fallback ลงระดับสูงสุดที่รองรับให้เอง (เช่น xhigh → high บน Opus 4.6) · ในเมนูยังมี <code>ultracode</code> = ส่ง xhigh + ให้ Claude Code จัด workflow แบบ dynamic เพิ่ม</p>
+
+  <h3>🎯 Cheat sheet: งาน → Model + Effort</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>งาน</th><th>Model</th><th>Effort</th></tr>
+    <tr><td>แก้ typo / rename / format / lookup</td><td>Haiku</td><td>low</td></tr>
+    <tr><td>feature ปกติ / bugfix ทั่วไป</td><td>Sonnet</td><td>medium–high (default)</td></tr>
+    <tr><td>debugging ยาก / refactor ข้ามหลายไฟล์</td><td>Opus</td><td>high</td></tr>
+    <tr><td>งาน agentic หนักต่อเนื่อง</td><td>Opus 4.7/4.8</td><td>xhigh</td></tr>
+    <tr><td>วางสถาปัตยกรรม / ปัญหาหินสุดของ codebase</td><td>Opus / Fable 5</td><td>max (ครั้งคราว)</td></tr>
+    <tr><td>plan ใหญ่แต่ execute ตรงไปตรงมา</td><td colspan="2"><code>/model opusplan</code> — Opus วางแผน, Sonnet ลงมือ</td></tr>
+  </table></div>
+
+  <h3>🤖 ตั้ง model/effort รายตัวให้ subagent &amp; skill</h3>
+  <p>นี่คือ "auto-routing" ที่ใกล้เคียงที่สุดใน Claude Code วันนี้ — ใส่ใน frontmatter แล้วค่าจะ override ระดับ session เฉพาะตอนตัวนั้นทำงาน:</p>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">.claude/agents/ — ถูกที่ถูกงานอัตโนมัติ</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre><span class="c"># explorer.md — งานสำรวจไฟล์เยอะ ใช้ตัวเร็ว</span>
+---
+name: repo-explorer
+description: ค้นหาไฟล์/อ่านโครงสร้าง repo อย่างรวดเร็ว
+model: haiku
+effort: low
+---
+
+<span class="c"># reviewer.md — งาน review ใช้ตัวลึก</span>
+---
+name: deep-reviewer
+description: review โค้ดเชิง logic + security อย่างละเอียด
+model: opus
+effort: xhigh
+---</pre>
+  </div>
+
+  <h3>💭 แล้ว "ultrathink" ล่ะ?</h3>
+  <p>รุ่นตั้งแต่ Opus 4.6 / Sonnet 4.6 ขึ้นไปใช้ <b>adaptive reasoning</b> — โมเดลตัดสินเองว่า step ไหนควรคิดลึกแค่ไหน โดยมี <b>effort เป็นคันโยกหลัก</b> (Opus 4.7+ และ Fable 5 เป็น adaptive เสมอ ปิดไม่ได้) ส่วน keyword พิเศษเหลือ<b>คำเดียว</b>คือ <code>ultrathink</code>: พิมพ์ไว้ตรงไหนก็ได้ใน prompt เพื่อขอให้คิดลึกขึ้น<b>เฉพาะ turn นั้น</b> โดยไม่เปลี่ยน effort ของ session — ⚠️ ระวังความเชื่อเก่า: <code>think</code> / <code>think hard</code> / <code>think harder</code> ตอนนี้เป็นแค่ข้อความธรรมดา <b>ไม่ใช่ keyword แล้ว</b></p>
+  <div class="callout c-warn"><b class="tt">⚠️ Effort สูง ≠ ดีเสมอ:</b> งานง่ายที่โดนสั่งให้คิดหนักจะ <b>overthink</b> — ช้าลง เปลือง limit และบางครั้งคำตอบแย่ลงด้วยซ้ำ กฎจำง่าย: <i>"ถ้ามนุษย์คิดมากเกินไปแล้วทำงานนั้นแย่ลง Claude ก็เช่นกัน"</i> เริ่มที่ default แล้วปรับขึ้นเฉพาะเมื่อเจองานที่คำตอบตื้นไป</div>
+  <div class="callout c-cw"><b class="tt">🧑‍💼 ฝั่ง Cowork / Claude app ก็เลือกได้:</b> กดชื่อ model ข้างช่องพิมพ์ → เลือกรุ่น (Haiku / Sonnet / Opus / Fable) และปรับ <b>Effort</b> ได้จาก picker เดียวกัน — ค่า default คือสมดุลที่เหมาะกับงานส่วนใหญ่ ลดระดับเมื่ออยากได้คำตอบไว/ประหยัด limit และเก็บระดับสูงสุดไว้กับโจทย์ยากจริงๆ · จำไว้ว่า Haiku/Sonnet "ประหยัดโควตา" กว่า Opus/Fable ชัดเจน — ถ้างานนั้น Sonnet เอาอยู่ การใช้ Opus คือจ่าย limit ฟรี · ฝั่งองค์กร admin ตั้ง default model ให้ทั้งทีมได้</div>
+</section>
+
+<!-- ===== S5 CLAUDE.md ===== -->
+<section id="claudemd" data-track="code">
+  <span class="eyebrow t-code">🧑‍💻 Claude Code · 03</span>
+  <h2>📝 CLAUDE.md — ไฟล์เดียวที่ leverage สูงสุด</h2>
+  <p>CLAUDE.md คือไฟล์ markdown ที่ Claude อ่าน<b>ทุกครั้ง</b>ที่เริ่ม conversation ใช้คำสั่ง <code>/init</code> ให้ Claude วิเคราะห์ codebase แล้วร่าง starter ให้ จากนั้นค่อยๆ เกลาเอง</p>
+  <h3>📍 วางไว้ที่ไหน (เฉพาะเจาะจงกว่า = ชนะ)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>ตำแหน่ง</th><th>ขอบเขต</th><th>หมายเหตุ</th></tr>
+    <tr><td><code>~/.claude/CLAUDE.md</code></td><td>ทุก project ของเครื่องนี้</td><td>style ส่วนตัวที่ใช้ทุกงาน</td></tr>
+    <tr><td><code>./CLAUDE.md</code></td><td>ทั้ง project</td><td>commit เข้า git แชร์ทั้งทีม ✅</td></tr>
+    <tr><td><code>./CLAUDE.local.md</code></td><td>เฉพาะเครื่องคุณ</td><td>ใส่ใน .gitignore</td></tr>
+    <tr><td><code>subdir/CLAUDE.md</code></td><td>เฉพาะโฟลเดอร์นั้น</td><td>เหมาะกับ monorepo</td></tr>
+  </table></div>
+  <h3>⚖️ ใส่อะไร / ไม่ใส่อะไร</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>✅ ควรใส่</th><th>❌ ไม่ควรใส่</th></tr>
+    <tr><td class="ok">bash commands ที่ Claude เดาเองไม่ได้</td><td class="no">สิ่งที่ Claude อ่านโค้ดแล้วรู้เอง</td></tr>
+    <tr><td class="ok">code style ที่ "ต่าง" จากมาตรฐาน</td><td class="no">convention มาตรฐานที่โมเดลรู้อยู่แล้ว</td></tr>
+    <tr><td class="ok">วิธีรัน test + test runner ที่ใช้</td><td class="no">API doc ยาวๆ (ให้ลิงก์/@import แทน)</td></tr>
+    <tr><td class="ok">repository etiquette (branch naming, PR)</td><td class="no">ข้อมูลที่เปลี่ยนบ่อย</td></tr>
+    <tr><td class="ok">สถาปัตยกรรม + quirks เฉพาะ project</td><td class="no">คำอธิบายไฟล์ทีละไฟล์</td></tr>
+    <tr><td class="ok">env vars ที่จำเป็น</td><td class="no">"เขียนโค้ดให้สะอาด" (กว้างเกิน)</td></tr>
+  </table></div>
+  <div class="callout c-code"><b class="tt">🥇 กฎทอง:</b> ทุกบรรทัดถามตัวเองว่า <i>"ถ้าลบบรรทัดนี้ Claude จะทำผิดไหม?"</i> ถ้าไม่ → ตัดทิ้ง · ความยาวที่คอมมูนิตี้แนะนำคือต่ำกว่า ~200–300 บรรทัด (ยิ่งสั้นยิ่งถูกเชื่อฟัง) · ใช้ <code>@path/to/file.md</code> เพื่อ import เอกสารอื่น · ใช้คำเน้นอย่าง "IMPORTANT" / "YOU MUST" แบบประหยัด</div>
+  <h3>📄 ตัวอย่างเต็ม (copy ไปปรับใช้ได้เลย)</h3>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">CLAUDE.md — ตัวอย่างสำหรับ Next.js project</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre># Project: ShopFront
+Next.js 14 e-commerce app, App Router, Stripe payments, Prisma ORM.
+
+## Commands
+- `npm run dev`: dev server (port 3000)
+- `npm run test`: Jest tests
+- `npm run lint`: ESLint
+- `npm run db:migrate`: Prisma migrations
+
+## Code Style
+- TypeScript strict mode, ห้ามใช้ `any`
+- ใช้ named exports เท่านั้น (ไม่ใช้ default export)
+- ใช้ ES modules (import/export) ไม่ใช่ CommonJS
+
+## Architecture
+- /app: pages &amp; layouts
+- /components/ui: reusable UI
+- /lib: utilities
+- /prisma: schema &amp; migrations
+
+## Important Notes
+- ห้าม commit ไฟล์ .env
+- Stripe webhook ที่ /app/api/webhooks/stripe ต้อง validate signature เสมอ
+- ดู @docs/authentication.md สำหรับ auth flow</pre>
+  </div>
+</section>
+
+<!-- ===== S6 WORKFLOW ===== -->
+<section id="workflow" data-track="code">
+  <span class="eyebrow t-code">🧑‍💻 Claude Code · 04</span>
+  <h2>🔄 Workflow หลัก: Explore → Plan → Code → Commit</h2>
+  <p>เป็น workflow ที่ Anthropic แนะนำเองสำหรับงานที่แตะหลายไฟล์ — อย่าปล่อยให้ Claude "พุ่งเข้าเขียนโค้ด" ก่อนเข้าใจงาน</p>
+  <div class="pipe">
+    <div class="step"><span class="n">1</span><h4>🔍 Explore</h4><p>เข้า plan mode (Shift+Tab) ให้ Claude อ่านไฟล์ / ตอบคำถาม โดยยังไม่แก้อะไร</p></div>
+    <div class="step"><span class="n">2</span><h4>🗺️ Plan</h4><p>ขอแผน implementation ละเอียด — กด Ctrl+G เปิดแผนใน editor เพื่อแก้ก่อนอนุมัติ</p></div>
+    <div class="step"><span class="n">3</span><h4>⌨️ Code</h4><p>ออกจาก plan mode ให้ลงมือเขียน พร้อมตรวจเทียบกับแผนเป็นระยะ</p></div>
+    <div class="step"><span class="n">4</span><h4>📦 Commit</h4><p>ให้เขียน commit message ที่ดี + เปิด PR + อัปเดต docs/changelog</p></div>
+  </div>
+  <p class="pipe-loop">↺ verify ไม่ผ่าน → วนกลับขั้น 2–3 พร้อม feedback ที่เฉพาะเจาะจง</p>
+  <div class="callout c-code"><b class="tt">⚡ ข้อยกเว้น:</b> งานเล็กที่ "อธิบาย diff ได้ในประโยคเดียว" (แก้ typo, เพิ่ม log) ทำเลยไม่ต้อง plan — อย่าทำพิธีเกินงาน</div>
+  <h3>🧪 Test-Driven Development (TDD) กับ Claude</h3>
+  <ul class="tick">
+    <li>บอกให้เขียน test จาก input/output ที่คาดหวัง<b>ก่อน</b> และระบุชัดว่า <i>"this is TDD — don't create mock implementations"</i></li>
+    <li>สั่งรัน test เพื่อยืนยันว่า <b>fail ก่อน</b> แล้วค่อยให้เขียน implementation</li>
+    <li>ให้ iterate จนผ่านทั้งหมด แล้วค่อย commit test กับโค้ดแยกขั้นกัน</li>
+  </ul>
+  <h3>👁️ Visual Iteration ด้วย screenshots</h3>
+  <p>ตั้ง Playwright/Puppeteer MCP ให้ Claude "เห็น" ผลงานตัวเอง — โดยปกติ iterate 2–3 รอบผลลัพธ์จะใกล้ design มาก</p>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">prompt — visual iteration loop</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre>use puppeteer to visit /dashboard, take a screenshot,
+compare it to design.png, list every difference you see,
+fix the top 3 differences, then repeat until it looks close.</pre>
+  </div>
+  <h3>❓ Codebase Q&amp;A (เหมาะกับ onboarding คนใหม่)</h3>
+  <p>ถาม Claude เหมือนถาม senior ในทีม เช่น "logging ในระบบนี้ทำงานยังไง?", "จะเพิ่ม API endpoint ใหม่ต้องแตะไฟล์ไหนบ้าง?", "ทำไมบรรทัด 333 เรียก foo() แทน bar()?" — ให้มันค้นเองทั้ง repo แทนการอ่านเองเป็นวัน</p>
+</section>
+
+<!-- ===== S7 CONTEXT ===== -->
+<section id="context" data-track="code">
+  <span class="eyebrow t-code">🧑‍💻 Claude Code · 05</span>
+  <h2>🧹 Context Management — ทรัพยากรที่สำคัญที่สุด</h2>
+  <p>คุณภาพคำตอบจะค่อยๆ ตกเมื่อ context ใกล้เต็ม (แม้รุ่นใหม่อย่าง Opus 4.6 จะมี 1M-token context แล้วก็ตาม) — จัดการ context ให้เป็นนิสัย:</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>คำสั่ง</th><th>ใช้เมื่อ</th></tr>
+    <tr><td><code>/clear</code></td><td>เริ่มงานใหม่ที่ไม่เกี่ยวกับงานเดิม — ใช้บ่อยๆ อย่าเสียดาย</td></tr>
+    <tr><td><code>/compact &lt;focus&gt;</code></td><td>บทสนทนายาวแต่ยังงานเดิม เช่น <code>/compact Focus on the API changes</code></td></tr>
+    <tr><td><code>Esc</code></td><td>หยุด Claude กลางทางทันทีเพื่อ redirect</td></tr>
+    <tr><td><code>Esc Esc</code> / <code>/rewind</code></td><td>ย้อนกลับ checkpoint (ทุก prompt สร้าง checkpoint ให้อัตโนมัติ)</td></tr>
+  </table></div>
+  <div class="callout c-warn"><b class="tt">🚨 กฎ 2 ครั้ง:</b> ถ้าแก้ Claude เรื่องเดิมเกิน 2 ครั้งแล้วยังไม่ได้ — อย่าดันต่อ context ตอนนี้เต็มไปด้วย approach ที่พัง ให้ <code>/clear</code> แล้วเขียน prompt ใหม่ที่ใส่บทเรียนจากรอบที่แล้วลงไป จะเร็วกว่ามาก</div>
+</section>
+
+<!-- ===== S8 PERMISSIONS ===== -->
+<section id="perms" data-track="code">
+  <span class="eyebrow t-code">🧑‍💻 Claude Code · 06</span>
+  <h2>🔐 Permissions &amp; Safety</h2>
+  <p>โดย default Claude Code ขออนุญาตก่อนทำสิ่งที่เปลี่ยนแปลงระบบ (เขียนไฟล์, รัน bash, เรียก MCP tools) ลดการกดยืนยันซ้ำๆ ได้ 3 ทาง:</p>
+  <ul class="tick">
+    <li><b>Auto mode</b> — ให้ classifier ตรวจคำสั่ง บล็อกเฉพาะที่เสี่ยง: <code>claude --permission-mode auto</code></li>
+    <li><b>Allowlist</b> — อนุญาตคำสั่งที่รู้ว่าปลอดภัยถาวร เช่น <code>npm run lint</code>, <code>git commit</code> ผ่าน <code>/permissions</code></li>
+    <li><b>Sandbox</b> — <code>/sandbox</code> แยกระดับ OS จำกัด filesystem/network สำหรับงานที่ไม่ไว้ใจ</li>
+  </ul>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">.claude/settings.json — deny rules ป้องกัน secrets</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre>{
+  "permissions": {
+    "allow": ["Bash(npm run lint)", "Bash(npm run test:*)", "Bash(git commit *)"],
+    "deny":  ["Read(./.env)", "Read(./.env.*)", "Read(./secrets/**)"]
+  }
+}</pre>
+  </div>
+  <div class="callout c-warn"><b class="tt">⛔ ห้ามติดนิสัย:</b> <code>--dangerously-skip-permissions</code> ใช้เฉพาะใน sandbox/container ที่ scope แคบจริงๆ เท่านั้น (เคยมี CVE ที่ deny rule ถูก bypass ได้ — อัปเดต Claude Code เป็นเวอร์ชันล่าสุดเสมอ)</div>
+</section>
+
+<!-- ===== S9 MCP ===== -->
+<section id="mcp" data-track="code">
+  <span class="eyebrow t-code">🧑‍💻 Claude Code · 07</span>
+  <h2>🔌 MCP Servers — ต่อ Claude เข้ากับโลกภายนอก</h2>
+  <p>MCP (Model Context Protocol) เป็น open standard ของ Anthropic (ยอดดาวน์โหลด ~100M/เดือน กลายเป็นมาตรฐานอุตสาหกรรม) ใช้เชื่อม Claude กับ tools / databases / APIs</p>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">mcp — คำสั่งที่ใช้บ่อย</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre><span class="c"># เพิ่ม remote HTTP server</span>
+claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+
+<span class="c"># เพิ่ม local stdio server พร้อม env var</span>
+claude mcp add --env AIRTABLE_API_KEY=YOUR_KEY \
+  --transport stdio airtable -- npx -y airtable-mcp-server
+
+claude mcp list        <span class="c"># ดู servers ทั้งหมด + สถานะ</span>
+claude mcp get sentry  <span class="c"># ตรวจรายตัว</span>
+<span class="c"># ใน session: พิมพ์ /mcp เพื่อ auth OAuth + ดูสถานะ</span></pre>
+  </div>
+  <div class="tbl-wrap"><table>
+    <tr><th>Scope</th><th>เก็บที่</th><th>เหมาะกับ</th></tr>
+    <tr><td><code>local</code></td><td>~/.claude.json</td><td>ใช้ส่วนตัว เฉพาะ project นี้ (default)</td></tr>
+    <tr><td><code>project</code></td><td>.mcp.json (commit ได้)</td><td>แชร์ให้ทั้งทีมใช้เหมือนกัน ✅</td></tr>
+    <tr><td><code>user</code></td><td>config ระดับเครื่อง</td><td>ใช้ทุก project ของคุณ</td></tr>
+  </table></div>
+  <p class="small">🔥 ที่นิยม: <code>GitHub</code> <code>Playwright</code> <code>Sentry</code> <code>PostgreSQL</code> <code>Figma</code> <code>Context7</code> — ติดตั้งจากแหล่งที่เชื่อถือได้เท่านั้น</p>
+</section>
+
+<!-- ===== S10 POWER TOOLS ===== -->
+<section id="power" data-track="code">
+  <span class="eyebrow t-code">🧑‍💻 Claude Code · 08</span>
+  <h2>⚡ Power Tools: Skills · Slash Commands · Hooks · Subagents</h2>
+  <p>4 กลไกขยายความสามารถ — เลือก tab เพื่อดูว่าแต่ละตัวต่างกันยังไงพร้อมไฟล์ตัวอย่าง</p>
+  <div class="tabs" id="power-tabs">
+    <div class="tab-btns" role="tablist">
+      <button role="tab" aria-selected="true" data-pane="p-skill">🧠 Skills</button>
+      <button role="tab" aria-selected="false" data-pane="p-cmd">⌨️ Slash Commands</button>
+      <button role="tab" aria-selected="false" data-pane="p-hook">🪝 Hooks</button>
+      <button role="tab" aria-selected="false" data-pane="p-sub">🤖 Subagents</button>
+    </div>
+    <div class="tab-pane show" id="p-skill">
+      <p><b>Skills = ความรู้ที่ Claude หยิบใช้เอง</b> เมื่องานตรงกับ description — เป็น folder ที่มีได้ทั้ง instructions, scripts และ assets ปัจจุบัน custom slash commands ถูก merge เข้ากับระบบ Skills แล้ว (ถ้าชื่อชนกัน skill ชนะ) จึงแนะนำให้เริ่มที่ <code>.claude/skills/&lt;name&gt;/SKILL.md</code></p>
+      <div class="term"><div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">.claude/skills/release-notes/SKILL.md</span><button class="copy-btn" type="button">คัดลอก</button></div>
+      <pre>---
+name: release-notes
+description: สร้าง release notes จาก git log ระหว่างสอง tag ใช้เมื่อผู้ใช้ขอ changelog หรือ release notes
+---
+# Release Notes Generator
+1. รัน `git log --oneline {{prev_tag}}..HEAD`
+2. จัดกลุ่ม commit เป็น Features / Fixes / Breaking Changes
+3. เขียนภาษาคนอ่านรู้เรื่อง ไม่ copy commit message ดิบ
+4. บันทึกเป็น RELEASE_NOTES.md</pre></div>
+    </div>
+    <div class="tab-pane" id="p-cmd">
+      <p><b>Slash commands = ทางลัดที่คุณเรียกเอง</b> — ไฟล์ markdown ใน <code>.claude/commands/</code> (ชื่อไฟล์ = ชื่อคำสั่ง) รับค่าผ่าน <code>$ARGUMENTS</code> หรือ <code>$1 $2</code> และตั้ง frontmatter จำกัด tools ได้</p>
+      <div class="term"><div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">.claude/commands/security-scan.md → ใช้: /security-scan</span><button class="copy-btn" type="button">คัดลอก</button></div>
+      <pre>---
+allowed-tools: Read, Grep, Glob
+description: สแกนหา security vulnerabilities ใน codebase
+---
+Analyze the codebase for security vulnerabilities including:
+- SQL injection risks
+- XSS vulnerabilities
+- Exposed credentials / secrets in code
+Report findings with file paths + line numbers. Focus: $ARGUMENTS</pre></div>
+    </div>
+    <div class="tab-pane" id="p-hook">
+      <p><b>Hooks = กฎที่รันแน่นอน 100%</b> (deterministic) ต่างจาก CLAUDE.md ที่เป็นแค่คำแนะนำ — เหมาะกับงานที่ "ต้องเกิดเสมอ" เช่น auto-format หลังแก้ไฟล์ทุกครั้ง</p>
+      <div class="term"><div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">.claude/settings.json — hook: lint ทุกครั้งหลัง edit</span><button class="copy-btn" type="button">คัดลอก</button></div>
+      <pre>{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Edit|Write",
+      "hooks": [{ "type": "command",
+                  "command": "npx eslint --fix \"$CLAUDE_FILE_PATHS\"" }]
+    }]
+  }
+}</pre></div>
+    </div>
+    <div class="tab-pane" id="p-sub">
+      <p><b>Subagents = ผู้ช่วยที่มี context แยกของตัวเอง</b> — เหมาะกับงานอ่านไฟล์เยอะหรือ review เพราะไม่กิน context หลัก เรียกตรงๆ ได้: <i>"use a subagent to review this code for security issues"</i></p>
+      <div class="term"><div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">.claude/agents/security-reviewer.md</span><button class="copy-btn" type="button">คัดลอก</button></div>
+      <pre>---
+name: security-reviewer
+description: Reviews code for security vulnerabilities
+tools: Read, Grep, Glob, Bash
+model: opus
+---
+You are a senior security engineer. Review code for:
+- Injection vulnerabilities (SQL, XSS, command injection)
+- Authentication / authorization flaws
+- Secrets or credentials in code
+Provide specific line references and suggested fixes.</pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S11 SCALE ===== -->
+<section id="scale" data-track="code">
+  <span class="eyebrow t-code">🧑‍💻 Claude Code · 09</span>
+  <h2>🤹 Headless Mode &amp; Multi-Claude Workflows</h2>
+  <h3>🤖 Headless: ใช้ใน script / CI</h3>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">headless — automation patterns</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre><span class="c"># ถามครั้งเดียวจบ</span>
+claude -p "Explain what this project does"
+
+<span class="c"># output เป็น JSON สำหรับ pipe ต่อ</span>
+claude -p "List all API endpoints" --output-format json
+
+<span class="c"># fan-out: migrate ทีละไฟล์จำนวนมาก พร้อมจำกัดสิทธิ์</span>
+for file in $(cat files.txt); do
+  claude -p "Migrate $file from React to Vue. Return OK or FAIL." \
+    --allowedTools "Edit,Bash(git commit *)"
+done</pre>
+  </div>
+  <h3>🌳 Git Worktrees: รันหลาย Claude พร้อมกัน</h3>
+  <p>worktree = working directory แยก branch ของตัวเองแต่แชร์ history เดียวกัน → หลาย session แก้ไฟล์ไม่ชนกัน (Desktop app สร้าง worktree ให้อัตโนมัติทุก session ใหม่)</p>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">2 terminals — 2 งานคู่ขนาน</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre><span class="c"># Terminal 1</span>
+claude --worktree feature/payments
+<span class="c"># Terminal 2</span>
+claude --worktree fix/auth-bug</pre>
+  </div>
+  <ul class="tick">
+    <li><b>Writer/Reviewer pattern</b> — ให้ Claude ตัวหนึ่งเขียน อีกตัว (context สดใหม่) review จะจับปัญหาได้ดีกว่าเพราะไม่ลำเอียงกับโค้ดที่เพิ่งเขียนเอง</li>
+    <li>ใช้เมื่องาน<b>เป็นอิสระต่อกัน</b>และยาวกว่าไม่กี่นาที — เพดานที่เหมาะคือ <b>2–4 sessions</b> ก่อนที่ overhead การ review จะกินกำไร</li>
+  </ul>
+</section>
+
+<!-- ===== S12 PROMPTS BEFORE/AFTER ===== -->
+<section id="prompts-code" data-track="code">
+  <span class="eyebrow t-code">🧑‍💻 Claude Code · 10</span>
+  <h2>💬 Prompting เฉพาะทาง: Before → After</h2>
+  <p>กดสลับ ❌/✅ เพื่อเทียบ — ความต่างเดียวที่สำคัญที่สุดคือ <b>ความเฉพาะเจาะจง + บอกวิธี verify</b></p>
+
+  <div class="ba">
+    <div class="ba-head"><span class="t">1 · Scope งานให้ชัด</span>
+      <div class="ba-toggle"><button class="b-bad on-bad" type="button">❌ Before</button><button class="b-good" type="button">✅ After</button></div></div>
+    <div class="ba-body bad">add tests for foo.py</div>
+    <div class="ba-body good" hidden>write a test for foo.py covering the edge case
+where the user is logged out. avoid mocks.</div>
+    <div class="ba-why">💡 ระบุ edge case ที่ต้องครอบคลุม + ข้อห้าม (no mocks) → ได้ test ที่มีความหมายจริง</div>
+  </div>
+
+  <div class="ba">
+    <div class="ba-head"><span class="t">2 · ชี้แหล่งข้อมูลให้ค้น</span>
+      <div class="ba-toggle"><button class="b-bad on-bad" type="button">❌ Before</button><button class="b-good" type="button">✅ After</button></div></div>
+    <div class="ba-body bad">why does ExecutionFactory have such a weird api?</div>
+    <div class="ba-body good" hidden>look through ExecutionFactory's git history
+and summarize how its api came to be</div>
+    <div class="ba-why">💡 บอก "ค้นจากไหน" (git history) → คำตอบอิงหลักฐาน ไม่ใช่เดา</div>
+  </div>
+
+  <div class="ba">
+    <div class="ba-head"><span class="t">3 · อ้าง pattern ที่มีอยู่แล้วใน codebase</span>
+      <div class="ba-toggle"><button class="b-bad on-bad" type="button">❌ Before</button><button class="b-good" type="button">✅ After</button></div></div>
+    <div class="ba-body bad">add a calendar widget</div>
+    <div class="ba-body good" hidden>look at how existing widgets are implemented on the
+home page. HotDogWidget.php is a good example.
+follow that pattern to add a calendar widget.</div>
+    <div class="ba-why">💡 ให้ตัวอย่างจริงในโปรเจกต์ → โค้ดใหม่กลืนกับของเดิม ไม่สร้างสไตล์แปลกปลอม</div>
+  </div>
+
+  <div class="ba">
+    <div class="ba-head"><span class="t">4 · เล่าอาการ + จุดเริ่มสืบ ไม่ใช่สั่ง "แก้บั๊ก"</span>
+      <div class="ba-toggle"><button class="b-bad on-bad" type="button">❌ Before</button><button class="b-good" type="button">✅ After</button></div></div>
+    <div class="ba-body bad">fix the login bug</div>
+    <div class="ba-body good" hidden>users report login fails after session timeout.
+check the auth flow in src/auth/, write a failing test
+that reproduces it, then fix.</div>
+    <div class="ba-why">💡 อาการ → ตำแหน่งที่น่าสงสัย → reproduce ด้วย test ก่อนแก้ = bug fix ที่พิสูจน์ได้</div>
+  </div>
+
+  <div class="ba">
+    <div class="ba-head"><span class="t">5 · ให้เกณฑ์ verify เสมอ</span>
+      <div class="ba-toggle"><button class="b-bad on-bad" type="button">❌ Before</button><button class="b-good" type="button">✅ After</button></div></div>
+    <div class="ba-body bad">implement a function that validates email</div>
+    <div class="ba-body good" hidden>write validateEmail().
+test cases: "user@example.com" → true, "invalid" → false.
+run the tests after implementing.</div>
+    <div class="ba-why">💡 มี input/output คาดหวัง + สั่งรัน test → Claude ตรวจงานตัวเองได้ ("ถ้า verify ไม่ได้ อย่า ship")</div>
+  </div>
+</section>
+
+<!-- ===== S13 PITFALLS ===== -->
+<section id="pitfalls" data-track="code">
+  <span class="eyebrow t-code">🧑‍💻 Claude Code · 11</span>
+  <h2>⚠️ Pitfalls ที่เจอบ่อย (คลิกเพื่อดูวิธีแก้)</h2>
+  <details class="acc"><summary>🍲 Kitchen-sink session — ยัดหลายงานใน context เดียว</summary>
+    <div class="acc-body">อาการ: เริ่มจากแก้บั๊ก ลามไป refactor ลามไปถามเรื่องอื่น คำตอบเริ่มเพี้ยนเพราะ context ปนกันหมด
+    <div class="fix"><b>วิธีแก้:</b> หนึ่ง session = หนึ่งงาน — <code>/clear</code> ทุกครั้งที่ขึ้นงานใหม่</div></div>
+  </details>
+  <details class="acc"><summary>🔁 แก้วนซ้ำกับ approach ที่พังแล้ว</summary>
+    <div class="acc-body">อาการ: บอกให้แก้ → ยังผิด → บอกอีก → ผิดแบบใหม่ เพราะ context เต็มไปด้วยความพยายามที่ fail
+    <div class="fix"><b>วิธีแก้:</b> กฎ 2 ครั้ง — <code>/clear</code> แล้วเขียน prompt ใหม่ที่สรุปบทเรียน เช่น "อย่าใช้วิธี X เพราะติด Y"</div></div>
+  </details>
+  <details class="acc"><summary>📜 CLAUDE.md ยาวจน Claude เริ่มเมินกฎ</summary>
+    <div class="acc-body">อาการ: เขียนกฎไว้แต่ Claude ทำผิดอยู่ดี — มักเกิดเมื่อไฟล์บวมเกิน ~300 บรรทัด
+    <div class="fix"><b>วิธีแก้:</b> ตัดด้วยกฎทอง "ลบแล้วพังไหม?" + ย้ายกฎที่ต้องเกิด 100% ไปเป็น <b>hook</b> แทน</div></div>
+  </details>
+  <details class="acc"><summary>🤝 Trust-then-verify gap — โค้ดดูดีแต่ไม่ handle edge case</summary>
+    <div class="acc-body">อาการ: รับโค้ดที่ "อ่านแล้วใช่" โดยไม่รัน — แตกตอน production
+    <div class="fix"><b>วิธีแก้:</b> ทุกงานต้องมีกลไก verify (test / screenshot / รันจริง) — ถ้า verify ไม่ได้ อย่า ship</div></div>
+  </details>
+  <details class="acc"><summary>🏗️ Over-engineering — abstraction เกินจำเป็น</summary>
+    <div class="acc-body">อาการ: ขอ function เดียว ได้ factory + interface + 3 ไฟล์ใหม่
+    <div class="fix"><b>วิธีแก้:</b> ใส่ใน CLAUDE.md: <code>use the simplest possible approach; no new abstractions unless asked</code></div></div>
+  </details>
+  <details class="acc"><summary>🌀 Infinite exploration — สั่ง "investigate" ไม่จำกัดขอบเขต</summary>
+    <div class="acc-body">อาการ: Claude ไล่อ่านครึ่ง repo เผา context หมดก่อนได้คำตอบ
+    <div class="fix"><b>วิธีแก้:</b> scope ให้แคบ ("ดูเฉพาะ src/auth/") หรือโยนงานสำรวจให้ <b>subagent</b> เพื่อรักษา context หลัก</div></div>
+  </details>
+</section>
+
+<!-- ============ COWORK TRACK ============ -->
+<!-- ===== S14 CW INTRO ===== -->
+<section id="cw-intro" data-track="cowork">
+  <span class="eyebrow t-cowork">🧑‍💼 Claude Cowork · 01</span>
+  <h2>🖥️ รู้จัก Claude Cowork — "เอา Claude ไปหางาน"</h2>
+  <p>Cowork คือ agentic AI สำหรับ knowledge work บน desktop (macOS / Windows) — ไม่ใช่ chat ที่ต้อง upload ไฟล์ทีละชิ้น แต่เป็นเพื่อนร่วมงานที่<b>ชี้ folder ให้ แล้วมันทำงานหลายขั้นตอนแทนคุณจนได้ไฟล์ผลลัพธ์</b> เปิดตัวเป็น research preview เมื่อ 12 ม.ค. 2026 และใช้ engine เดียวกับ Claude Code ทุกประการ (ตัว Cowork เองก็ถูกเขียนขึ้นด้วย Claude Code)</p>
+  <h3>⚙️ เบื้องหลังเมื่อคุณกดส่งงาน 1 ชิ้น</h3>
+  <div class="pipe p-cw">
+    <div class="step"><span class="n">1</span><h4>🧠 วิเคราะห์ + วางแผน</h4><p>อ่านคำขอ สร้างแผนงานให้เห็นก่อนลงมือ</p></div>
+    <div class="step"><span class="n">2</span><h4>🧩 แตก subtasks</h4><p>ซอยงานใหญ่เป็นชิ้นย่อยที่ตรวจได้</p></div>
+    <div class="step"><span class="n">3</span><h4>🛡️ รันใน isolated VM</h4><p>โค้ด/shell รันในกล่องแยกจาก OS หลัก</p></div>
+    <div class="step"><span class="n">4</span><h4>🔀 ทำงานคู่ขนาน</h4><p>ประสานหลาย workstream พร้อมกัน</p></div>
+    <div class="step"><span class="n">5</span><h4>📁 ส่งไฟล์ลง folder</h4><p>ผลลัพธ์เขียนลง file system ตรงๆ ไม่ต้อง download</p></div>
+  </div>
+  <h3>🎚️ Permission modes</h3>
+  <ul class="tick">
+    <li><b>Ask before acting</b> — หยุดขออนุมัติทุก action สำคัญ (แนะนำเสมอเมื่อใช้ folder / tool ใหม่)</li>
+    <li><b>Act without asking</b> — ลื่นไหลกว่าแต่เสี่ยงกว่า ใช้เฉพาะตอนนั่งดูอยู่ + ทำงานกับไฟล์/เว็บที่เชื่อถือได้</li>
+  </ul>
+  <div class="callout c-cw"><b class="tt">🛡️ Deletion protection:</b> ไม่ว่าโหมดไหน Cowork จะ<b>ขออนุญาตก่อนลบไฟล์ถาวรเสมอ</b> — แต่ก็ยังควร backup ไฟล์สำคัญก่อนเริ่มใช้งานจริงอยู่ดี</div>
+</section>
+
+<!-- ===== S15 CW FIT ===== -->
+<section id="cw-fit" data-track="cowork">
+  <span class="eyebrow t-cowork">🧑‍💼 Claude Cowork · 02</span>
+  <h2>🎯 งานแบบไหน "ใช่" สำหรับ Cowork</h2>
+  <p>Anthropic ให้สูตร 5 ส่วนผสม — งานไม่ต้องครบทุกข้อ แต่ยิ่งติ๊กได้หลายข้อ ยิ่งคุ้มที่จะโยนให้ Cowork:</p>
+  <div class="ing">
+    <div class="it"><span class="em">📥</span><b>หลาย input</b>หลายไฟล์ / ทั้ง folder / ไฟล์ + connector</div>
+    <div class="it"><span class="em">📤</span><b>output เป็นไฟล์</b>doc, deck, spreadsheet, CSV ที่ส่งต่อได้</div>
+    <div class="it"><span class="em">🔁</span><b>ทำซ้ำได้</b>งาน recurring คือ sweet spot — schedule ได้ด้วย</div>
+    <div class="it"><span class="em">👀</span><b>รู้ว่า "ดี" หน้าตายังไง</b>ตรวจผลได้ใน 15 วินาที</div>
+    <div class="it"><span class="em">🥱</span><b>ตรงกลางน่าเบื่อ</b>extract / compile / reconcile / reformat</div>
+  </div>
+  <h3>📏 เส้นแบ่ง Chat vs Cowork (ตัวอย่างจาก Anthropic)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>คำขอ</th><th>เครื่องมือ</th><th>เพราะ</th></tr>
+    <tr><td>"ควรพูดอะไรในที่ประชุม business review?"</td><td>💬 Chat</td><td>ต้องการความคิด ไม่ใช่ไฟล์</td></tr>
+    <tr><td>"อ่าน meeting notes 3 เดือนใน folder นี้ แล้วสร้าง QBR deck ตาม template ของเรา"</td><td>🧑‍💼 Cowork</td><td>หลาย input → ไฟล์ pptx</td></tr>
+    <tr><td>"VLOOKUP ใช้ยังไง?"</td><td>💬 Chat</td><td>คำถามความรู้</td></tr>
+    <tr><td>"ไล่ทั้งสเปรดชีต เปลี่ยน VLOOKUP ทั้งหมดเป็น INDEX MATCH"</td><td>🧑‍💼 Cowork</td><td>ลงมือแก้ไฟล์จริงซ้ำๆ</td></tr>
+  </table></div>
+</section>
+
+<!-- ===== S16 CW PROMPT ===== -->
+<section id="cw-prompt" data-track="cowork">
+  <span class="eyebrow t-cowork">🧑‍💼 Claude Cowork · 03</span>
+  <h2>✍️ สั่งงานให้เวิร์ก: บอก "ผลลัพธ์" ไม่ใช่ "ขั้นตอน"</h2>
+  <div class="ba">
+    <div class="ba-head"><span class="t">สั่งแบบ outcome-oriented</span>
+      <div class="ba-toggle"><button class="b-bad on-bad" type="button">❌ Before</button><button class="b-good" type="button">✅ After</button></div></div>
+    <div class="ba-body bad">เปิดไฟล์ expenses.xlsx → copy column B →
+วางใน sheet ใหม่ → ใส่สูตร SUM → จัด format ตัวหนา →
+แล้วค่อยทำ column C ต่อ...</div>
+    <div class="ba-body good" hidden>วิเคราะห์ไฟล์ทั้งหมดใน folder "Q2-expenses"
+แล้วสร้างรายงาน Word สรุปการใช้จ่ายรายหมวด
+พร้อม executive summary + ตาราง top 5 expenses
++ chart เปรียบเทียบกับ Q1 (ไฟล์ Q1 อยู่ folder เดียวกัน)</div>
+    <div class="ba-why">💡 บอกเป้าหมาย + วัตถุดิบ + หน้าตาผลลัพธ์ แล้วปล่อยให้ Cowork วางขั้นตอนเอง — มันเก่งเรื่องนี้กว่าการตามสคริปต์ทีละคลิก</div>
+  </div>
+  <h3>🪄 ประโยคเดียวที่เปลี่ยนคุณภาพงาน (Anthropic เรียกว่า habit ที่มีประโยชน์ที่สุด)</h3>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">วางต่อท้าย prompt ทุกงานใหญ่</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre>Before we begin, repeat my ask back to me so we're aligned,
+then ask me as many clarifying questions as you have.</pre>
+  </div>
+  <h3>🧠 "Brain file" — ให้ Claude รู้จักคุณก่อนเริ่มทุกงาน</h3>
+  <p>สร้างไฟล์เดียวไว้ใน workspace แล้วตั้ง Folder/Global Instructions (Settings → Cowork) ให้อ่านก่อนเสมอ:</p>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">brain.md — ตัวอย่าง</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre># เกี่ยวกับฉัน
+- บทบาท: Marketing Manager ดูแลทีม 4 คน
+- งานหลัก: รายงาน performance รายสัปดาห์, สรุปประชุม, จัดแคมเปญ
+
+# สไตล์ที่ต้องการ
+- ภาษาไทยเป็นหลัก ศัพท์เทคนิคเป็นอังกฤษได้ กระชับ ตรงประเด็น
+- ทุกตัวเลขต้องระบุแหล่งที่มา / ไฟล์ต้นทาง
+- สรุปเป็น bullet ก่อน แล้วค่อยลงรายละเอียด
+
+# ข้อห้าม
+- ห้ามส่งอีเมล/โพสต์อะไรออกไปโดยไม่ขอ confirm ก่อน
+- ห้ามแก้ไฟล์ใน folder "Final" — สร้างสำเนาใหม่แทน</pre>
+  </div>
+  <div class="callout c-cw"><b class="tt">🧪 เริ่มอย่างปลอดภัย:</b> งานแรกๆ ให้ชี้ <b>test folder</b> ที่ copy ไฟล์มาทดลอง ไม่ใช่ folder งานจริง — สร้างความเข้าใจ + ความไว้ใจก่อน แล้วค่อยขยับไปงานจริง</div>
+</section>
+
+<!-- ===== S16b CW MODELS ===== -->
+<section id="cw-models" data-track="cowork">
+  <span class="eyebrow t-cowork">🧑‍💼 Claude Cowork · 04</span>
+  <h2>🎚️ เลือก Model &amp; Effort ใน Cowork — ฉบับคนไม่เขียนโค้ด</h2>
+  <p>ใน Cowork กดชื่อ model ข้างช่องพิมพ์ → เลือกรุ่น (Haiku / Sonnet / Opus / Fable) และปรับ <b>Effort</b> ได้จากจุดเดียวกัน ข่าวดีคือ <b>ไม่เลือกอะไรเลยก็ทำงานได้ดี</b> เพราะค่า default ถูกตั้งมาให้สมดุล — แต่ถ้าเลือกให้ตรงงาน คุณจะได้งานเร็วขึ้น และ usage limit อยู่ได้นานขึ้นชัดเจน</p>
+  <h3>🧭 สูตรจำง่าย 3 ระดับ</h3>
+  <div class="grid3">
+    <div class="card tool-card tc-chat"><span class="ico">🐇</span><h3>งานเบา / ซ้ำๆ</h3><p>จัดไฟล์, แปลง format, สรุปสั้นๆ, งานที่ schedule รายวัน</p><span class="out">Sonnet · effort default/ลดลง</span></div>
+    <div class="card tool-card tc-cw"><span class="ico">⚖️</span><h3>งานมาตรฐาน</h3><p>รายงาน, สไลด์, spreadsheet จากหลายไฟล์</p><span class="out">ค่า default (หรือ Sonnet เพื่อประหยัด)</span></div>
+    <div class="card tool-card tc-code"><span class="ico">🧠</span><h3>งานหนัก / run ยาว</h3><p>หลาย folder + connector, วิเคราะห์เชิงกลยุทธ์</p><span class="out">Opus / Fable · effort สูง</span></div>
+  </div>
+  <h3>📋 Use cases จริง: งานไหน ใช้อะไร เพราะอะไร</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>งานตัวอย่างใน Cowork</th><th>Model</th><th>Effort</th><th>เหตุผล</th></tr>
+    <tr><td>จัดระเบียบ folder / เปลี่ยนชื่อไฟล์ / แปลง format ทีละมากๆ</td><td>Sonnet</td><td>ต่ำกว่า default</td><td>งานกลไก ไม่ต้องคิดลึก — เร็วสุด ประหยัดโควตาสุด</td></tr>
+    <tr><td>สรุป transcript ประชุม 1 ไฟล์ → action items</td><td>Sonnet</td><td>default</td><td>งานสรุปมาตรฐานที่ Sonnet เอาอยู่สบาย</td></tr>
+    <tr><td>ใบเสร็จทั้ง folder → expense report (xlsx)</td><td>Sonnet</td><td>default</td><td>ขั้นตอนชัด รู้หน้าตาผลลัพธ์อยู่แล้ว — ไม่จำเป็นต้องจ่ายแพง</td></tr>
+    <tr><td>Daily briefing แบบ <code>/schedule</code> ทุกเช้า</td><td>Sonnet</td><td>default/ต่ำ</td><td>งานซ้ำทุกวันกินโควตา<b>สะสม</b> — เลือกตัวประหยัดคุ้มระยะยาว</td></tr>
+    <tr><td>QBR deck จาก meeting notes 3 เดือน + template</td><td>Opus</td><td>default</td><td>ต้องเชื่อมโยงหลายแหล่ง + เล่าเรื่องให้คม — ความลึกของ Opus คุ้ม</td></tr>
+    <tr><td>วิเคราะห์ spreadsheet ใหญ่ → insight + ข้อเสนอเชิงกลยุทธ์</td><td>Opus</td><td>สูงขึ้น</td><td>งาน reasoning จริง ไม่ใช่แค่จัด format — ถ้าตื้นไปต้องเสียเวลาสั่งแก้</td></tr>
+    <tr><td>โปรเจกต์ research ยาว หลาย folder + หลาย connector</td><td>Opus / Fable (ถ้ามีสิทธิ์)</td><td>สูง</td><td>run ยาวหลายขั้นตอน — นิสัย investigate/verify ของรุ่นใหญ่คุ้มค่า</td></tr>
+  </table></div>
+  <div class="callout c-cw"><b class="tt">💡 หลักคิดที่ทำให้มั่นใจ:</b> ① เริ่มที่ <b>default ก่อนเสมอ</b> — เลือกผิดยาก ② งานซ้ำๆ/เบา → ลดเป็น Sonnet หรือ effort ต่ำ เพื่อยืดโควตา ③ ถ้าผลลัพธ์ "ตื้นไป" หรือพลาดประเด็น → ค่อยอัปเป็น Opus / ดัน effort สูงขึ้นแล้วสั่งใหม่ — model สลับได้ทุกงาน เปลี่ยนกลางบทสนทนาก็ได้โดย<b>บริบทงานไม่หาย</b> ไม่มีอะไรผูกถาวร</div>
+</section>
+
+<!-- ===== S17 CW SKILLS ===== -->
+<section id="cw-skills" data-track="cowork">
+  <span class="eyebrow t-cowork">🧑‍💼 Claude Cowork · 05</span>
+  <h2>🛠️ Skills — เอกสารระดับมืออาชีพแบบ "read before create"</h2>
+  <p>Cowork มี built-in document skills: <code>docx</code> <code>pptx</code> <code>xlsx</code> <code>pdf</code> — Claude จะอ่านคู่มือ skill ที่เกี่ยวข้องก่อนสร้างไฟล์เสมอ ทำให้ได้ Word ที่มี tracked changes, Excel ที่สูตรทำงานจริง (VLOOKUP / conditional formatting / หลาย tab), PowerPoint ที่มี speaker notes</p>
+  <h3>🗣️ ประโยคที่ช่วย trigger skill ให้ตรงงาน</h3>
+  <ul class="tick">
+    <li>"…and <b>add tracked changes</b> so I can review your edits" → ได้ docx ที่ review ง่าย</li>
+    <li>"…<b>include speaker notes</b> for each slide" → pptx พร้อมพูดจริง</li>
+    <li>"…ใช้ <b>สูตรจริง</b> ไม่ใช่ค่า hardcode เพื่อให้ผมแก้ตัวเลขต้นทางแล้วทุกอย่างอัปเดตตาม" → xlsx ที่มีชีวิต</li>
+  </ul>
+  <h3>🧩 สร้าง custom skill ของทีมเอง</h3>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">SKILL.md — template เริ่มต้น</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre>---
+name: weekly-report
+description: สร้างรายงานสรุปประจำสัปดาห์ตาม format ของทีม ใช้เมื่อผู้ใช้ขอ weekly report หรือสรุปงานรายสัปดาห์
+---
+# Weekly Report ของทีมเรา
+โครงสร้างที่ต้องมีเสมอ (เรียงตามนี้):
+1. 🎯 Highlights — 3 bullets สิ่งที่สำเร็จ
+2. 📊 ตัวเลขหลัก — เทียบกับสัปดาห์ก่อน ระบุ % เปลี่ยนแปลง
+3. 🚧 Blockers — ปัญหา + คนที่ต้อง action
+4. 📅 สัปดาห์หน้า — แผน 3 ข้อ
+โทน: กระชับ อ่านจบใน 2 นาที / บันทึกเป็น docx ใน folder "Reports"</pre>
+  </div>
+  <div class="callout c-warn"><b class="tt">⚠️ ความปลอดภัย:</b> ติดตั้ง skill จาก<b>แหล่งที่เชื่อถือได้เท่านั้น</b>และเปิดอ่านเนื้อหาก่อนเปิดใช้ — skill อาจมี script/dependency แฝงอันตรายได้ (เปิด/ปิดได้ที่ Customize → Skills)</div>
+</section>
+
+<!-- ===== S18 CW CONNECTORS ===== -->
+<section id="cw-connect" data-track="cowork">
+  <span class="eyebrow t-cowork">🧑‍💼 Claude Cowork · 06</span>
+  <h2>🔗 Connectors &amp; Plugins — ต่อ Cowork เข้ากับ tools ที่ทีมใช้</h2>
+  <h3>🔌 Connectors (ผ่าน MCP)</h3>
+  <ul class="tick">
+    <li>เชื่อมด้วย OAuth ใน UI ไม่ต้องตั้งค่าอะไรซับซ้อน — ใช้ได้ข้าม session</li>
+    <li><b>เคารพสิทธิ์เดิมของบัญชีคุณเสมอ</b>: Claude เห็นได้เท่าที่บัญชีคุณเห็น</li>
+    <li>ตัวอย่างที่นิยม: <code>Slack</code> <code>Gmail</code> <code>Google Drive</code> <code>Microsoft 365</code> <code>Notion</code> <code>Jira</code> <code>Salesforce</code> <code>HubSpot</code> <code>Snowflake</code></li>
+  </ul>
+  <h3>📦 Plugins = skills + connectors + commands + subagents มัดรวมตามสายงาน</h3>
+  <p>Anthropic open-source plugins สำหรับ knowledge workers หลายสาย (productivity, sales, finance, legal, data-analysis, HR ฯลฯ):</p>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">ติดตั้ง plugin จาก official marketplace</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre>claude plugin marketplace add anthropics/knowledge-work-plugins
+claude plugin install sales@knowledge-work-plugins
+
+<span class="c"># แล้วเรียกใช้ผ่าน slash command เช่น</span>
+/sales:call-prep   /data:write-query</pre>
+  </div>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">โครงสร้าง plugin</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre>plugin-name/
+├── .claude-plugin/plugin.json   <span class="c"># manifest</span>
+├── .mcp.json                    <span class="c"># tool connections</span>
+├── commands/                    <span class="c"># slash commands</span>
+└── skills/                      <span class="c"># ความรู้เฉพาะสายงาน</span></pre>
+  </div>
+</section>
+
+<!-- ===== S19 CW USE CASES ===== -->
+<section id="cw-cases" data-track="cowork">
+  <span class="eyebrow t-cowork">🧑‍💼 Claude Cowork · 07</span>
+  <h2>📋 Use Cases จริงที่นำไปใช้ได้ทันที</h2>
+  <div class="grid2">
+    <div class="card"><h3 style="margin-top:0">🗂️ จัดระเบียบไฟล์</h3><p class="small">"Organize my Downloads folder by type and date" — เคลียร์ไฟล์เป็นร้อยเข้าหมวดในไม่กี่นาที (ลองกับ folder ทดสอบก่อน)</p></div>
+    <div class="card"><h3 style="margin-top:0">🧾 ใบเสร็จ → Expense report</h3><p class="small">โยนรูปใบเสร็จทั้งทริปลง folder → "สร้าง expense report เป็น xlsx แยกหมวด พร้อมรวมยอด + แนบชื่อไฟล์ใบเสร็จอ้างอิงในแต่ละแถว"</p></div>
+    <div class="card"><h3 style="margin-top:0">📊 Meeting notes → QBR deck</h3><p class="small">"อ่าน meeting notes 3 เดือนใน folder นี้ สรุป win / risk / next steps แล้วสร้าง deck 10 สไลด์ตาม template.pptx พร้อม speaker notes"</p></div>
+    <div class="card"><h3 style="margin-top:0">🌅 Daily briefing 6 โมงเช้า</h3><p class="small">เชื่อม Slack + Gmail แล้ว schedule: "สรุป unread ทั้งหมด จัดหมวด ด่วน/รอได้/FYI พร้อม TLDR บรรทัดเดียวต่อเรื่อง" (ตัวอย่างจริงจากทีม marketing ของ Anthropic)</p></div>
+    <div class="card"><h3 style="margin-top:0">📈 Live dashboard</h3><p class="small">เชื่อม Google Ads / Search Console → สร้างหน้า HTML dashboard ที่ดึงข้อมูลเอง — งานรายงานที่เคยใช้ ~30 นาที/สัปดาห์ เหลือ ~5 นาที</p></div>
+    <div class="card"><h3 style="margin-top:0">🎙️ Transcript → Action items</h3><p class="small">"จาก transcript ประชุมทั้งหมดใน folder นี้ ดึง action items แยกตามเจ้าของงาน + deadline แล้วสรุปเป็นตารางใน docx เดียว"</p></div>
+  </div>
+</section>
+
+<!-- ===== S20 CW AUTO ===== -->
+<section id="cw-auto" data-track="cowork">
+  <span class="eyebrow t-cowork">🧑‍💼 Claude Cowork · 08</span>
+  <h2>⏰ ยกระดับ: Scheduled Tasks · Projects · Dispatch</h2>
+  <ul class="tick">
+    <li><b>⏰ Scheduled tasks</b> — พิมพ์ <code>/schedule</code> ในงานไหนก็ได้เพื่อให้รันซ้ำตามรอบ (รันเฉพาะตอนเครื่องตื่น + app เปิดอยู่) → เหมาะกับ daily briefing, weekly report</li>
+    <li><b>🗂️ Projects</b> — workspace แยกที่มี files + instructions + <b>memory</b> ของตัวเอง เหมาะกับงาน recurring / long-running (memory จำข้ามงานใน Project เดียวกัน แต่ไม่ข้าม standalone session)</li>
+    <li><b>📱 Dispatch</b> (Pro/Max, beta) — สั่งงานจากมือถือไปรันบน desktop ที่เปิดอยู่ เป็น thread เดียวต่อเนื่อง ไม่ reset context</li>
+  </ul>
+  <div class="term">
+    <div class="term-head"><span class="td"></span><span class="td"></span><span class="td"></span><span class="ttl">ตัวอย่าง Dispatch จากมือถือ</span><button class="copy-btn" type="button">คัดลอก</button></div>
+    <pre>There's a PowerPoint on my desktop called "Northgate Strategy".
+Export it to PDF and attach to my 2PM calendar invite.</pre>
+  </div>
+</section>
+
+<!-- ===== S21 CW SAFETY ===== -->
+<section id="cw-safety" data-track="cowork">
+  <span class="eyebrow t-cowork">🧑‍💼 Claude Cowork · 09</span>
+  <h2>🔒 Safety — สิ่งที่ทุกคนในทีมต้องรู้ก่อนใช้</h2>
+  <ul class="tick">
+    <li><b>Isolated VM</b>: โค้ด/shell ทั้งหมดรันในกล่องแยก ไม่แตะ OS หลักโดยตรง</li>
+    <li><b>Controlled access</b>: อ่าน/เขียนได้เฉพาะ folder ที่คุณอนุญาต, network ตามที่ตั้งค่า</li>
+    <li><b>Deletion protection</b>: ขออนุญาตก่อนลบไฟล์ถาวรเสมอ ทุกโหมด</li>
+  </ul>
+  <h3>🎣 Prompt Injection — ภัยอันดับหนึ่งที่ต้องสอนทุกคน</h3>
+  <p>คือคำสั่งร้ายที่<b>ซ่อนอยู่ในเนื้อหา</b>ที่ Claude อ่าน เช่น ข้อความสีขาวบนพื้นขาว / font 1pt ในเอกสาร, อีเมล, หน้าเว็บ — หลอกให้ Claude "ทำสิ่งที่คุณไม่ได้สั่ง" เช่น ส่งข้อมูลออกไปข้างนอก Cowork มี content classifiers ช่วย scan เนื้อหาที่ไม่น่าเชื่อถือ แต่<b>ความเสี่ยงไม่เคยเป็นศูนย์</b></p>
+  <div class="callout c-warn"><b class="tt">🛡️ แนวปฏิบัติ:</b> ① ใช้ "Ask before acting" กับงาน/แหล่งข้อมูลใหม่เสมอ ② จำกัดการท่องเว็บให้อยู่ในไซต์ที่เชื่อถือได้ ③ ใช้ MCP / plugin / skill จากแหล่ง official เท่านั้น ④ ระวังเป็นพิเศษกับ computer use — ไม่มี sandbox ระหว่าง Claude กับหน้าจอจริง การคลิกลิงก์ใน app หนึ่งอาจพาไปเปิด app อื่นที่ไม่ได้ตั้งใจอนุญาต</div>
+</section>
+
+<!-- ============ SHARED TRACK ============ -->
+<!-- ===== S22 COMPARE ===== -->
+<section id="compare" data-track="shared">
+  <span class="eyebrow t-shared">🤝 ใช้ร่วมกัน · 01</span>
+  <h2>🆚 ตารางเปรียบเทียบ: Claude Code vs Claude Cowork</h2>
+  <div class="tbl-wrap"><table>
+    <tr><th>มิติ</th><th>🧑‍💻 Claude Code</th><th>🧑‍💼 Claude Cowork</th></tr>
+    <tr><td><b>Interface</b></td><td>Terminal / IDE / CLI / Code tab</td><td>Desktop app (GUI)</td></tr>
+    <tr><td><b>กลุ่มผู้ใช้</b></td><td>Developers</td><td>Knowledge workers (ไม่ต้องเขียนโค้ด)</td></tr>
+    <tr><td><b>Setup</b></td><td>ต้องความรู้ technical (CLI, git, CLAUDE.md)</td><td>ติดตั้ง app แล้วชี้ folder — จบ</td></tr>
+    <tr><td><b>File access</b></td><td>full filesystem ตามสิทธิ์ user</td><td>เฉพาะ folder ที่อนุญาต</td></tr>
+    <tr><td><b>Execution</b></td><td>รันบนเครื่องด้วยสิทธิ์เต็มของ user</td><td>isolated VM (ปลอดภัยกว่าโดย default)</td></tr>
+    <tr><td><b>Autonomy</b></td><td>สูง ปรับได้ละเอียด</td><td>ปานกลาง แบบ guided</td></tr>
+    <tr><td><b>การขยาย</b></td><td>MCP · skills · hooks · subagents (config ผ่านไฟล์)</td><td>connectors · plugins · skills (ผ่าน UI)</td></tr>
+    <tr><td><b>Scheduling</b></td><td>ต้องพึ่ง cron / CI ภายนอก</td><td>built-in <code>/schedule</code></td></tr>
+  </table></div>
+  <div class="callout"><b class="tt">🧭 กฎง่ายๆ:</b> ไม่แน่ใจ → เริ่มที่ <b>Cowork</b> (ง่ายกว่า ปลอดภัยกว่า) แล้วค่อย "graduate" ไป Claude Code เมื่อต้องการ control ละเอียดขึ้น — และถ้า Cowork เริ่มชนกำแพงงานซับซ้อน นั่นคือสัญญาณให้ย้ายฝั่ง</div>
+</section>
+
+<!-- ===== S23 PRINCIPLES ===== -->
+<section id="principles" data-track="shared">
+  <span class="eyebrow t-shared">🤝 ใช้ร่วมกัน · 02</span>
+  <h2>🎓 หลัก Prompting 6 ข้อ ใช้ได้ทั้งสองฝั่ง</h2>
+  <ul class="tick">
+    <li><b>1. ชัดเจน ตรง ละเอียด</b> — คิดว่า Claude คือ intern เก่งมากแต่เพิ่งมาวันแรก: ให้บริบท เป้าหมาย และข้อจำกัดครบ</li>
+    <li><b>2. ให้ตัวอย่าง (few-shot)</b> — แนบ 2–5 ตัวอย่าง input/output ที่ดี ครอบด้วย tag อย่าง <code>&lt;example&gt;</code> เพิ่มความแม่นยำชัดเจน</li>
+    <li><b>3. ใช้ XML tags แยกส่วน</b> — <code>&lt;instructions&gt;</code> <code>&lt;context&gt;</code> <code>&lt;data&gt;</code> ช่วยให้ไม่ปนกัน (Claude ถูก fine-tune ให้สนใจ tags เป็นพิเศษ)</li>
+    <li><b>4. ให้คิดทีละขั้น</b> — งานที่ต้อง reasoning ให้บอก "think step by step ก่อนตอบ"</li>
+    <li><b>5. ระบุ output format</b> — JSON / ตาราง / ความยาว / ภาษา อย่าให้เดา</li>
+    <li><b>6. ทดสอบและ iterate</b> — prompt ที่ดีเกิดจากการลองและปรับ ไม่ใช่เขียนครั้งเดียวเป๊ะ</li>
+  </ul>
+  <div class="callout"><b class="tt">🥇 Golden rule:</b> เอา prompt ของคุณให้เพื่อนร่วมงานที่<b>ไม่รู้บริบท</b>อ่าน — ถ้าเขางง Claude ก็งง</div>
+</section>
+
+<!-- ===== S24 CHECKLIST ===== -->
+<section id="checklist" data-track="shared">
+  <span class="eyebrow t-shared">🤝 ใช้ร่วมกัน · 03</span>
+  <h2>✅ Quick Start Checklist — ติ๊กตามได้เลย</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">🧑‍💻 Developer (Claude Code) — สัปดาห์แรก</h3>
+      <ul class="cl" data-prog="prog-dev">
+        <li><input type="checkbox" id="d1"><label for="d1">ติดตั้งด้วย native installer → รัน <code>claude doctor</code></label></li>
+        <li><input type="checkbox" id="d2"><label for="d2">รัน <code>/init</code> สร้าง CLAUDE.md → ตัดให้เหลือเฉพาะจำเป็น (&lt;200 บรรทัด)</label></li>
+        <li><input type="checkbox" id="d3"><label for="d3">ลอง Explore→Plan→Code→Commit กับงานจริง 1 งาน (ใช้ plan mode)</label></li>
+        <li><input type="checkbox" id="d4"><label for="d4">ตั้ง allowlist ให้ <code>npm run lint</code>, <code>git commit</code> + เพิ่ม GitHub MCP</label></li>
+        <li><input type="checkbox" id="d5"><label for="d5">สร้าง skill/command แรกจาก workflow ที่ทำซ้ำบ่อย</label></li>
+      </ul>
+      <div class="progress"><i id="prog-dev"></i></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">🧑‍💼 Knowledge worker (Cowork) — 10 นาทีแรก</h3>
+      <ul class="cl cw-cl" data-prog="prog-cw">
+        <li><input type="checkbox" id="w1"><label for="w1">เปิด Claude Desktop → สลับไป Cowork → ชี้ <b>test folder</b> ที่ปลอดภัย</label></li>
+        <li><input type="checkbox" id="w2"><label for="w2">ตั้ง Global Instructions + สร้าง brain.md</label></li>
+        <li><input type="checkbox" id="w3"><label for="w3">เลือกงาน recurring 1 งานที่รู้ว่า "ดี" หน้าตายังไง → สั่งแบบ outcome + ให้ Claude ถามก่อนเริ่ม</label></li>
+        <li><input type="checkbox" id="w4"><label for="w4">เชื่อม connector ที่ใช้ทุกวัน 1–2 ตัว (Slack / Gmail / Drive) → ลอง <code>/schedule</code></label></li>
+        <li><input type="checkbox" id="w5"><label for="w5">ติดตั้ง plugin ตรงสายงาน + ใช้ "Ask before acting" จนกว่าจะไว้ใจ</label></li>
+      </ul>
+      <div class="progress pw"><i id="prog-cw"></i></div>
+    </div>
+  </div>
+  <h3>🚦 สัญญาณว่าควร "เปลี่ยนวิธี"</h3>
+  <ul class="tick">
+    <li>แก้ Claude เรื่องเดิมเกิน 2 ครั้ง → <code>/clear</code> + เขียน prompt ใหม่</li>
+    <li>CLAUDE.md ยาวจนกฎถูกเมิน → ตัดทิ้ง / แปลงเป็น hook</li>
+    <li>Cowork ชนกำแพงงานซับซ้อน → ย้ายไป Claude Code</li>
+    <li>usage limit หมดเร็ว → batch งานเข้าด้วยกัน + ใช้ Chat กับงานง่าย</li>
+  </ul>
+</section>
+
+<footer>
+  <h3>📚 แหล่งอ้างอิงหลัก (official)</h3>
+  <p>anthropic.com/engineering/claude-code-best-practices · code.claude.com/docs · support.claude.com (บทความ "Get started with Claude Cowork", "Use Claude Cowork safely") · claude.com/blog (Cowork best practices) · github.com/anthropics/skills · github.com/anthropics/knowledge-work-plugins</p>
+  <p style="margin-top:10px"><b>หมายเหตุ:</b> จัดทำ มิ.ย. 2026 — ฟีเจอร์ของทั้งสอง product เปลี่ยนเร็วมาก (Cowork ยังอยู่ในช่วง research preview) ตัวเลข adoption มาจาก third-party · prompt injection ป้องกันได้ไม่ 100% ผู้ใช้ต้องระวังเองด้วยเสมอ · ตรวจ docs ทางการก่อนใช้คำสั่ง/ฟีเจอร์ใน production</p>
+</footer>
+</main>
+</div>
+<button class="totop" id="totop" aria-label="กลับขึ้นด้านบน">↑</button>
+<script>
+(function(){
+"use strict";
+var $=function(s,c){return (c||document).querySelector(s)};
+var $$=function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
+var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* 1) Track filter */
+$$('.seg button').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    $$('.seg button').forEach(function(b){b.setAttribute('aria-pressed','false')});
+    btn.setAttribute('aria-pressed','true');
+    document.body.setAttribute('data-filter',btn.dataset.f);
+  });
+});
+
+/* 2) Copy buttons */
+function flash(b){var o=b.textContent;b.textContent='คัดลอกแล้ว ✓';setTimeout(function(){b.textContent=o},1600)}
+function fallbackCopy(t,b){
+  var ta=document.createElement('textarea');ta.value=t;
+  ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');flash(b)}catch(e){}
+  document.body.removeChild(ta);
+}
+$$('.copy-btn').forEach(function(b){
+  b.addEventListener('click',function(){
+    var pre=b.closest('.term').querySelector('pre');
+    var t=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){flash(b)}).catch(function(){fallbackCopy(t,b)});
+    }else{fallbackCopy(t,b)}
+  });
+});
+
+/* 3) Quiz terminal */
+var qLog=$('#q-log'),qOpts=$('#q-opts'),qRes=$('#q-result');
+var QS=[
+  {q:'Q1 · งานนี้อยู่ใน codebase / git / terminal หรือเปล่า?',
+   opts:[{k:'y',t:'ใช่',next:'CODE'},{k:'n',t:'ไม่',next:1}]},
+  {q:'Q2 · อยากได้ output เป็นไฟล์ (doc/deck/sheet) หรือมี input หลายไฟล์ / เป็นงานทำซ้ำ?',
+   opts:[{k:'y',t:'ใช่',next:2},{k:'n',t:'ไม่',next:'CHAT'}]},
+  {q:'Q3 · แล้วงาน Cowork ชิ้นนี้ "หนัก" ประมาณไหน? (เพื่อเลือก model + effort)',
+   opts:[
+     {k:'a',t:'เบา/ซ้ำๆ — จัดไฟล์ สรุปสั้น งาน schedule รายวัน',next:'CW_LIGHT'},
+     {k:'b',t:'มาตรฐาน — รายงาน/สไลด์/sheet จากหลายไฟล์',next:'CW_STD'},
+     {k:'c',t:'หนัก/ยาว — หลาย folder + connector วิเคราะห์ลึก',next:'CW_HEAVY'}
+   ]}
+];
+var RESULT={
+  CODE:'🧑‍💻 <b>ใช้ Claude Code</b> — งานในโลกของ repo, branch, test, terminal คือบ้านของมัน → เริ่มที่ <a href="#setup">การติดตั้ง</a> แล้วเลือกรุ่น/ความลึกที่ <a href="#models">Model &amp; Effort</a>',
+  CHAT:'💬 <b>ใช้ Claude (Chat) ก็พอ</b> — ถาม-ตอบ brainstorm ร่างข้อความ จบในบทสนทนา · รุ่น default + effort default เหมาะกับงานแบบนี้อยู่แล้ว',
+  CW_LIGHT:'🧑‍💼 <b>Cowork + 🐇 Sonnet (effort default หรือลดลง)</b> — งานเบา/ซ้ำๆ เน้นความไวและประหยัดโควตา โดยเฉพาะงานที่ schedule รันทุกวัน → ดูตัวอย่างที่ <a href="#cw-models">Model &amp; Effort ใน Cowork</a>',
+  CW_STD:'🧑‍💼 <b>Cowork + ⚖️ ค่า default</b> (หรือ Sonnet เพื่อยืดโควตา) — รายงาน/สไลด์/sheet มาตรฐาน ค่าตั้งต้นเอาอยู่สบาย → <a href="#cw-models">ดู use cases</a> และ <a href="#cw-prompt">วิธีสั่งงาน</a>',
+  CW_HEAVY:'🧑‍💼 <b>Cowork + 🧠 Opus (หรือ Fable ถ้ามีสิทธิ์) + effort สูง</b> — งานหลายขั้นตอน run ยาว ความลึกคุ้มโควตาที่จ่าย → <a href="#cw-models">ดูเหตุผล + ตัวอย่างเต็ม</a>'
+};
+function addLine(text,done){
+  if(!qLog){return}
+  var p=document.createElement('span');p.className='a';p.textContent='claude> ';qLog.appendChild(p);
+  var t=document.createElement('span');qLog.appendChild(t);
+  if(reduced){t.textContent=text;qLog.appendChild(document.createTextNode('\n'));if(done)done();return}
+  var i=0;
+  var iv=setInterval(function(){
+    t.textContent=text.slice(0,++i);
+    if(i>=text.length){clearInterval(iv);qLog.appendChild(document.createTextNode('\n'));if(done)done()}
+  },14);
+}
+function addAns(a){var s=document.createElement('span');s.className='g';s.textContent='you> '+a+'\n';qLog.appendChild(s)}
+function renderOpts(idx){
+  qOpts.innerHTML='';
+  QS[idx].opts.forEach(function(o){
+    var b=document.createElement('button');b.type='button';b.textContent=o.k+' — '+o.t;
+    b.addEventListener('click',function(){answer(idx,o)});
+    qOpts.appendChild(b);
+  });
+}
+function answer(idx,o){
+  qOpts.innerHTML='';addAns(o.k);
+  if(typeof o.next==='number'){showQ(o.next)}else{finish(o.next)}
+}
+function finish(code){
+  addLine('วิเคราะห์เสร็จ — คำแนะนำอยู่ด้านล่าง ↓',function(){
+    qRes.innerHTML=RESULT[code];qRes.style.display='block';
+    var rb=document.createElement('button');rb.type='button';rb.textContent='↺ เริ่มใหม่';
+    rb.addEventListener('click',resetQuiz);qOpts.appendChild(rb);
+  });
+}
+function showQ(idx){addLine(QS[idx].q,function(){renderOpts(idx)})}
+function resetQuiz(){
+  qLog.innerHTML='<span class="g">$</span> ./pick-tool.sh\n<span class="c"># เครื่องมือที่ใช่ ขึ้นกับว่างานอยู่ที่ไหน และอยากได้อะไรออกมา</span>\n';
+  qRes.style.display='none';qRes.innerHTML='';qOpts.innerHTML='';
+  showQ(0);
+}
+if(qLog){showQ(0)}
+
+/* 4) Tabs */
+$$('.tabs').forEach(function(tabs){
+  var btns=$$('[role=tab]',tabs);
+  btns.forEach(function(b){
+    b.addEventListener('click',function(){
+      btns.forEach(function(x){x.setAttribute('aria-selected','false')});
+      b.setAttribute('aria-selected','true');
+      $$('.tab-pane',tabs).forEach(function(p){p.classList.remove('show')});
+      var pane=document.getElementById(b.dataset.pane);
+      if(pane)pane.classList.add('show');
+    });
+  });
+});
+
+/* 5) Before/After toggles */
+$$('.ba').forEach(function(ba){
+  var bb=$('.b-bad',ba),bg=$('.b-good',ba);
+  var bodyB=$('.ba-body.bad',ba),bodyG=$('.ba-body.good',ba);
+  if(!bb||!bg||!bodyB||!bodyG)return;
+  function set(good){
+    bodyB.hidden=good;bodyG.hidden=!good;
+    bb.classList.toggle('on-bad',!good);bg.classList.toggle('on-good',good);
+  }
+  bb.addEventListener('click',function(){set(false)});
+  bg.addEventListener('click',function(){set(true)});
+});
+
+/* 6) Checklist progress */
+$$('.cl').forEach(function(list){
+  var bar=document.getElementById(list.dataset.prog);
+  var boxes=$$('input[type=checkbox]',list);
+  if(!bar||!boxes.length)return;
+  function upd(){
+    var n=boxes.filter(function(b){return b.checked}).length;
+    bar.style.width=(n/boxes.length*100)+'%';
+  }
+  boxes.forEach(function(b){b.addEventListener('change',upd)});
+});
+
+/* 7) Animate chart bars when visible */
+var fills=$$('.chart .fill');
+function fillBars(){fills.forEach(function(f){f.style.width=f.dataset.w+'%'})}
+if(reduced||!('IntersectionObserver' in window)){fillBars()}
+else{
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){e.target.style.width=e.target.dataset.w+'%';io.unobserve(e.target)}
+    });
+  },{threshold:0.4});
+  fills.forEach(function(f){io.observe(f)});
+}
+
+/* 8) Scrollspy on rail */
+var navLinks=$$('.rail a.nav');
+var navMap={};
+navLinks.forEach(function(a){navMap[a.getAttribute('href').slice(1)]=a});
+if('IntersectionObserver' in window){
+  var spy=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){
+        navLinks.forEach(function(a){a.classList.remove('active')});
+        var a=navMap[e.target.id];
+        if(a)a.classList.add('active');
+      }
+    });
+  },{rootMargin:'-15% 0px -70% 0px'});
+  $$('section[id]').forEach(function(s){spy.observe(s)});
+}
+
+/* 9) Back to top */
+var tt=$('#totop');
+if(tt){
+  window.addEventListener('scroll',function(){
+    tt.style.display=window.scrollY>600?'block':'none';
+  },{passive:true});
+  tt.addEventListener('click',function(){
+    window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+  });
+}
+})();
+</script>
+</body>
+</html>

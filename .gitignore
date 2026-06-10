@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Thumbnails
+Thumbs.db
+ehthumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node (ถ้ามีในอนาคต)
+node_modules/
+package-lock.json
+
+# Logs
+*.log
+
+# OS generated
+.Spotlight-V100
+.Trashes
