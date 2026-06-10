@@ -32,6 +32,7 @@ a{color:var(--code-deep)}
 .rail{position:sticky;top:0;height:100vh;overflow-y:auto;background:#fff;border-right:1px solid var(--line);padding:20px 14px 32px;scrollbar-width:thin}
 .rail-brand{font-family:var(--font-disp);font-weight:700;font-size:15px;line-height:1.35;padding:4px 8px 14px;border-bottom:1px solid var(--line);margin-bottom:12px}
 .rail-brand .sub{display:block;font-family:var(--font-body);font-weight:400;font-size:12px;color:var(--muted);margin-top:2px}
+.rail-toggle{display:none}
 .rail-group{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:16px 8px 6px;display:flex;align-items:center;gap:7px}
 .dot{width:8px;height:8px;border-radius:50%;flex:none}
 .dot.c{background:var(--code)} .dot.w{background:var(--cw)} .dot.b{background:var(--both)} .dot.i{background:var(--muted)}
@@ -207,11 +208,21 @@ footer h3{font-size:15px;margin-top:0}
 
 /* ===== Responsive ===== */
 @media (max-width:960px){
-  .app{grid-template-columns:1fr;max-width:100vw}
-  .rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:14px;overflow-x:hidden}
-  .rail-nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}
-  .rail-group{display:none!important}
-  .rail a.nav{white-space:nowrap;background:var(--paper);font-size:12.5px}
+  .app{grid-template-columns:minmax(0,1fr);max-width:100vw}
+  .rail{position:sticky;top:0;z-index:60;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px 14px;overflow:visible;background:#fff}
+  .rail-brand{display:none}
+  .rail-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;border:1px solid var(--line);background:var(--paper);font-family:var(--font-disp);font-weight:600;font-size:14px;color:var(--ink);padding:11px 14px;border-radius:10px;cursor:pointer;min-height:46px}
+  .rail-toggle .chev{font-family:var(--font-mono);transition:transform .2s}
+  .rail.open .rail-toggle .chev{transform:rotate(180deg)}
+  .rail-nav{display:none;flex-direction:column;gap:2px;margin-top:8px;max-height:68vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .rail.open .rail-nav{display:flex}
+  .rail-group{display:flex;margin:12px 8px 4px;font-size:11px}
+  .rail-group:first-child{margin-top:4px}
+  .rail a.nav{white-space:normal;background:transparent;font-size:14.5px;padding:11px 12px;min-height:44px;display:flex;align-items:center;border-radius:8px;line-height:1.4}
+  .rail a.nav:hover{background:var(--paper)}
+  .topbar{position:static}
+  .copy-btn{min-height:32px;padding:6px 12px}
+  .ba-toggle button{min-height:36px;padding:7px 13px}
   .grid2,.grid3{grid-template-columns:1fr}
   .pipe .step{min-width:100%;border-left:1px solid var(--line)!important;border-top:0}
   .pipe .step:first-child{border-radius:var(--r) var(--r) 0 0}
@@ -225,7 +236,7 @@ footer h3{font-size:15px;margin-top:0}
   .topbar{margin:0 -14px;padding:10px 14px;gap:8px}
   .topbar .lbl{display:none}
   .seg{width:100%;justify-content:center}
-  .seg button{font-size:12px;padding:5px 10px}
+  .seg button{font-size:12px;padding:8px 12px;min-height:40px}
   .hero{padding:28px 0 12px}
   .hero h1{font-size:clamp(22px,6vw,28px)}
   .hero p.lead{font-size:15px}
@@ -241,27 +252,26 @@ footer h3{font-size:15px;margin-top:0}
   .term{margin:10px -14px;border-radius:0}
   .term pre{padding:12px 14px;font-size:12px;line-height:1.6}
   .term-head{padding:7px 14px}
-  .copy-btn{font-size:10.5px;padding:2px 9px}
+  .copy-btn{font-size:11px;padding:6px 12px;min-height:32px}
   .callout{padding:12px 14px;margin:12px 0;font-size:14px}
   .eyebrow{font-size:10px;padding:3px 9px}
   ul.tick li{padding:3px 0 3px 22px;font-size:14px}
   ul.tick li::before{left:4px}
   .ba-head{padding:9px 12px}
   .ba-body{padding:12px 14px;font-size:12px}
-  .ba-toggle button{font-size:11px;padding:3px 10px}
+  .ba-toggle button{font-size:11px;padding:8px 13px;min-height:38px}
   .chart .row{grid-template-columns:80px 1fr 40px;gap:8px;margin:7px 0}
   .chart .name{font-size:12px}
   .chart .val{font-size:12px}
   .q-opts{padding:0 14px 12px;gap:8px}
-  .q-opts button{font-size:12px;padding:6px 14px}
-  .tab-btns button{font-size:12px;padding:6px 12px}
+  .q-opts button{font-size:12px;padding:10px 14px;min-height:42px}
+  .tab-btns button{font-size:12px;padding:9px 12px;min-height:40px}
   .tab-pane{padding:14px 16px}
   .cl li{font-size:13px;gap:8px}
   .ing{grid-template-columns:1fr}
-  .rail{padding:10px}
-  .rail-brand{font-size:13px;padding:4px 6px 10px}
-  .rail-nav{gap:4px}
-  .rail a.nav{font-size:11.5px;padding:5px 8px}
+  .rail{padding:8px 12px}
+  .rail-nav{gap:2px}
+  .rail a.nav{font-size:14px;padding:11px 12px;min-height:44px}
   .grid2,.grid3{gap:10px}
   .tool-card .ico{font-size:22px}
   .tool-card h3{font-size:15px}
@@ -278,7 +288,8 @@ footer h3{font-size:15px;margin-top:0}
 <!-- ===== SIDEBAR ===== -->
 <nav class="rail" aria-label="สารบัญ">
   <div class="rail-brand">📘 Claude Code × Cowork<span class="sub">Best Practices · ฉบับเทรนนิ่ง 2026</span></div>
-  <div class="rail-nav">
+  <button class="rail-toggle" id="railToggle" type="button" aria-expanded="false" aria-controls="railNav"><span>📘 เมนูเนื้อหา</span><span class="chev">▾</span></button>
+  <div class="rail-nav" id="railNav">
     <div class="rail-group g-intro"><span class="dot i"></span>เริ่มต้นที่นี่</div>
     <a class="nav" data-track="intro" href="#overview">🧭 ภาพรวม 3 เครื่องมือ</a>
     <a class="nav" data-track="intro" href="#decide">🤔 เลือกเครื่องมือไหนดี</a>
@@ -1316,6 +1327,27 @@ if(tt){
   },{passive:true});
   tt.addEventListener('click',function(){
     window.scrollTo({top:0,behavior:reduced?'auto':'smooth'});
+  });
+}
+
+/* 10) Mobile nav dropdown */
+var rail=$('.rail'),railToggle=$('#railToggle');
+if(rail&&railToggle){
+  railToggle.addEventListener('click',function(){
+    var open=rail.classList.toggle('open');
+    railToggle.setAttribute('aria-expanded',open?'true':'false');
+  });
+  $$('.rail a.nav').forEach(function(a){
+    a.addEventListener('click',function(){
+      rail.classList.remove('open');
+      railToggle.setAttribute('aria-expanded','false');
+    });
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&rail.classList.contains('open')){
+      rail.classList.remove('open');
+      railToggle.setAttribute('aria-expanded','false');
+    }
   });
 }
 })();
