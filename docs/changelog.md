@@ -7,12 +7,17 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - แก้บั๊ก CSS grid blowout บน mobile/tablet — เดิม `.app` ใช้ `grid-template-columns:1fr` (min-width:auto) ทำให้คอลัมน์เนื้อหากว้าง ~751px แล้วถูก `overflow-x:hidden` ตัดด้านขวาทิ้ง (เนื้อหาครึ่งขวาหายไป) เปลี่ยนเป็น `minmax(0,1fr)` ให้ตรงกับ desktop
+- แก้แถบ "โหมดการอ่าน" (filter) กดแล้วเหมือนใช้ไม่ได้ — สาเหตุจริงคือ `overflow-x:hidden` บน `html`/`body`/`.app` ทำให้ `overflow-y` ถูกคำนวณเป็น auto และทำลาย `position:sticky` แถบจึงเลื่อนหายตอน scroll เปลี่ยนเป็น `overflow-x:clip` (กันล้นแนวนอนได้เหมือนเดิมแต่ไม่สร้าง scroll container) แถบ filter กลับมา sticky และกดได้ทุกตำแหน่ง
+
+### Added
+
+- กดปุ่มโหมดการอ่านแล้วเลื่อนไปยัง section แรกของโหมดนั้นอัตโนมัติ (Code → ติดตั้ง, Cowork → รู้จัก Cowork, ใช้ร่วมกัน → ตารางเปรียบเทียบ, ทั้งหมด → กลับขึ้นบนสุด) รองรับ `prefers-reduced-motion`
 
 ### Changed
 
-- ปรับเมนูสารบัญบนมือถือ/แท็บเล็ตจาก "แถบเลื่อนแนวนอน 28 รายการแบบไม่มีกลุ่ม" เป็น dropdown แบบยุบ/ขยายได้ (ปุ่ม "📘 เมนูเนื้อหา") ที่ติดอยู่ด้านบน (sticky) และแสดง group label (Dev / Cowork / ใช้ร่วมกัน) ครบ
+- ปรับเมนูสารบัญบนมือถือ/แท็บเล็ตจาก "แถบเลื่อนแนวนอน 28 รายการแบบไม่มีกลุ่ม" เป็น dropdown แบบยุบ/ขยายได้ (ปุ่ม "📘 เมนูเนื้อหา") พร้อมแสดง group label (Dev / Cowork / ใช้ร่วมกัน) ครบ
 - ขยาย tap target ให้ได้มาตรฐาน touch: nav links ≥44px, ปุ่ม filter/quiz/tabs ≥40px, ปุ่ม copy/before-after ≥32–36px บนอุปกรณ์สัมผัส
-- บนมือถือ topbar (โหมดการอ่าน) เปลี่ยนเป็น static เพื่อหลีกเลี่ยงการซ้อนทับกับเมนู sticky
+- บนมือถือคงแถบ filter ให้ sticky (เป็นตัวควบคุมหลัก) และให้ nav rail เป็น static เพื่อให้มี sticky element เดียว ไม่ทับกัน
 
 ## [1.0.2] - 2026-06-10
 
