@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2026-06-10
+
+### Changed
+
+- ปรับปรุง responsive design สำหรับ mobile (breakpoint 600px)
+- ลด font size, padding, margin ให้อ่านง่ายบนหน้าจอเล็ก
+- Terminal blocks และ tables ขยายเต็มจอบน mobile
+- ซ่อน label "โหมดการอ่าน" บน mobile ให้ปุ่มกรองเต็มพื้นที่
+
 ## [1.0.1] - 2026-06-10
 
 ### Added
