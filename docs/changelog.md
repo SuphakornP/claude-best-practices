@@ -9,3 +9,7 @@ All notable changes to this project will be documented in this file.
 - สร้าง presentation คู่มือการใช้งาน Claude เบื้องต้น (Initial release)
 - เนื้อหาครอบคลุมการใช้งาน Claude สำหรับผู้เริ่มต้น
 - แนวทางปฏิบัติที่ดีในการทำงานร่วมกับ Claude Code
+- เพิ่ม `AGENTS.md` — กฎกติกาการจัดการเอกสารสำหรับ AI Agent และผู้ร่วมพัฒนา
+- เพิ่ม `README.md` พร้อม Mermaid charts สำหรับ visualization
+- เพิ่ม `.gitignore`
+- Publish to GitHub Pages ที่ `suphakornp.github.io/claude-best-practices`
