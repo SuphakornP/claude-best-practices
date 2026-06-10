@@ -72,14 +72,14 @@ flowchart TD
 ```
 Everything about Claude/
 ├── README.md                                ← ไฟล์นี้
-├── claude-code-cowork-best-practices.html   # Presentation หลัก (เปิดในเบราว์เซอร์)
+├── index.html                               # Presentation หลัก (GitHub Pages)
 └── docs/
     └── changelog.md                         # บันทึกการเปลี่ยนแปลง
 ```
 
 ## 🚀 วิธีใช้งาน
 
-1. เปิดไฟล์ `claude-code-cowork-best-practices.html` ในเบราว์เซอร์
+1. เปิดไฟล์ `index.html` ในเบราว์เซอร์ หรือเข้าผ่าน GitHub Pages
 2. ใช้ปุ่มกรองด้านบนเพื่อเลือกดูเนื้อหาเฉพาะกลุ่ม:
    - 🧑‍💻 **Claude Code** — สำหรับ developer
    - 🧑‍💼 **Claude Cowork** — สำหรับ knowledge worker
