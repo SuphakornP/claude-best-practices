@@ -74,6 +74,9 @@ Everything about Claude/
 ├── README.md                                ← ไฟล์นี้
 ├── AGENTS.md                                # กฎกติกาสำหรับ AI Agent / ผู้ร่วมพัฒนา
 ├── index.html                               # Presentation หลัก (GitHub Pages)
+├── .github/
+│   └── workflows/
+│       └── deploy-pages.yml                 # CI/CD deploy to GitHub Pages
 └── docs/
     └── changelog.md                         # บันทึกการเปลี่ยนแปลง
 ```

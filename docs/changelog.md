@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2026-06-10
+
+### Added
+
+- เพิ่ม GitHub Actions workflow สำหรับ CI/CD deploy to GitHub Pages
+- ใช้ `actions/deploy-pages@v4` แทน legacy build
+
+### Changed
+
+- เปลี่ยน Pages build_type จาก legacy เป็น workflow
+
 ## [1.0.0] - 2026-06-10
 
 ### Added
